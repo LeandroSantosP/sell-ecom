@@ -1,0 +1,11 @@
+services:
+  ecom-mysql:
+    image: 'mysql:latest'
+    container_name: "sell-ecom"
+    environment:
+      - 'MYSQL_DATABASE=sell-ecom'
+      - 'MYSQL_USER=sps_user'
+      - 'MYSQL_PASSWORD=sps_pass'
+      - 'MYSQL_ROOT_PASSWORD=sps_pass'
+    ports:
+      - '3307:3306'
