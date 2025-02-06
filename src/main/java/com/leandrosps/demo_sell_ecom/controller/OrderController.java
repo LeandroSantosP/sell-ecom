@@ -12,6 +12,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
+import org.apache.catalina.connector.Response;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -29,9 +31,9 @@ public class OrderController {
     }
 
     @PostMapping("/place-order")
-    public String placeOrder(@RequestBody InnerOrderController input) {
+    public ResponseEntity<String> placeOrder(@RequestBody InnerOrderController input) {
         var product_id = this.orderService.placeOrder(input.email(), input.items());
-        return product_id;
+        return ResponseEntity.ok(product_id);
     }
     
 }

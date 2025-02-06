@@ -27,6 +27,7 @@ public class OrderService {
 	}
 
 	public String placeOrder(String email, List<ItemInputs> orderItems) {
+		/* Create an repository? who knows */
 		var clientData = this.jdbcClient.sql(/* language=sql */"""
 					SELECT * FROM clients WHERE email = :email
 				""")
@@ -53,8 +54,6 @@ public class OrderService {
 			order.addItem(productData.id(), productData.price(), item.quantity());
 		}
 
-
-		// persiste Order ...
 		return order.getId();
 	}
 }
