@@ -47,11 +47,12 @@ public class OrderService {
 					""";
 			var productData = this.jdbcClient
 					.sql(getProductSql)
-					.param("id",item.procuct_id())
+					.param("id", item.procuct_id())
 					.query(ProductDbModel.class)
 					.optional().orElseThrow(() -> new NotFoundEx());
 			order.addItem(productData.id(), productData.price(), item.quantity());
 		}
+
 
 		// persiste Order ...
 		return order.getId();

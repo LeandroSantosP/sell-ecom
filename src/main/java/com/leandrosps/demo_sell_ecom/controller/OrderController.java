@@ -1,6 +1,7 @@
 package com.leandrosps.demo_sell_ecom.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.leandrosps.demo_sell_ecom.application.OrderService;
@@ -28,9 +29,9 @@ public class OrderController {
     }
 
     @PostMapping("/place-order")
-    public void placeOrder(@RequestBody InnerOrderController input) {
-        var placeOrder = this.orderService.placeOrder(input.email(), input.items());
-        return;
+    public String placeOrder(@RequestBody InnerOrderController input) {
+        var product_id = this.orderService.placeOrder(input.email(), input.items());
+        return product_id;
     }
     
 }
