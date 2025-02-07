@@ -1,4 +1,4 @@
-package com.leandrosps.demo_sell_ecom.application;
+package com.leandrosps.demo_sell_ecom.db;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

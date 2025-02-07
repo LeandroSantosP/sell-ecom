@@ -2,10 +2,13 @@ package com.leandrosps.demo_sell_ecom.application;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
+import com.leandrosps.demo_sell_ecom.db.ClientDbModel;
+import com.leandrosps.demo_sell_ecom.db.OrderDbModel;
+import com.leandrosps.demo_sell_ecom.db.OrderRepository;
+import com.leandrosps.demo_sell_ecom.db.ProductDbModel;
 import com.leandrosps.demo_sell_ecom.domain.Client;
 import com.leandrosps.demo_sell_ecom.domain.Order;
 import com.leandrosps.demo_sell_ecom.domain.OrderItem;
@@ -15,9 +18,11 @@ import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 public class OrderService {
 
 	private JdbcClient jdbcClient;
+	private OrderRepository orderRepository;
 
-	public OrderService(JdbcClient jdbcClient) {
+	public OrderService(JdbcClient jdbcClient, OrderRepository orderRepository) {
 		this.jdbcClient = jdbcClient;
+		this.orderRepository = orderRepository;
 	}
 
 	public record ItemInputs(String procuct_id, Integer quantity) {
@@ -54,6 +59,23 @@ public class OrderService {
 			order.addItem(productData.id(), productData.price(), item.quantity());
 		}
 
+		this.orderRepository.save(order);
+		
 		return order.getId();
+	}
+
+	public record GetOrderOutput(String clientEmail, String status, long total, List<OrderItem> items) {
+	}
+
+	public GetOrderOutput getOrder(String orderId) {
+
+		var order = this.orderRepository.getOrder(orderId);
+
+		this.jdbcClient.sql("""
+					SELECT * FROM orders WHERE id = :id
+				""")
+				.param("id", orderId)
+				.query(OrderDbModel.class);
+		throw new UnsupportedOperationException("Unimplemented method 'getOrder'");
 	}
 }

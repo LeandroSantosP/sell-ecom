@@ -20,7 +20,6 @@ CREATE TABLE brands (
    img_ref VARCHAR(150) 
 ) 
 
-
 CREATE TABLE IF NOT EXISTS products (
    id VARCHAR(150) PRIMARY KEY,
    name VARCHAR(100) NOT NULL,

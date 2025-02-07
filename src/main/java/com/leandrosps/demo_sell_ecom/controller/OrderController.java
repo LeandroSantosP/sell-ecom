@@ -31,7 +31,7 @@ public class OrderController {
     }
 
     @PostMapping("/place-order")
-    public ResponseEntity<String> placeOrder(@RequestBody InnerOrderController input) {
+    public ResponseEntity<?> placeOrder(@RequestBody InnerOrderController input) {
         var product_id = this.orderService.placeOrder(input.email(), input.items());
         return ResponseEntity.ok(product_id);
     }
