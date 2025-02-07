@@ -13,21 +13,24 @@ import lombok.Getter;
 public class Order {
    private String id;
    private String clientId;
+   private String clientEmail;
+   private Status status;
    private LocalDateTime orderDate;
    private List<OrderItem> orderItems;
    private Long total;
 
-   
-   public static Order create(String clientId, LocalDateTime orderDate) {
+   public static Order create(String clientId, String clientEmail, LocalDateTime orderDate) {
       if (orderDate == null) {
          orderDate = LocalDateTime.now();
       }
-      return new Order(UUID.randomUUID().toString(), clientId, orderDate, new ArrayList<>(), 0L);
-
+      var inital_status = Status.WATING_PAYMENT;
+      return new Order(UUID.randomUUID().toString(), clientId, clientEmail, inital_status, orderDate, new ArrayList<>(),
+            0L);
    }
 
-   public void addItem(String productId, long unityPrice, int quantity){
-      this.orderItems.add(new OrderItem(productId, unityPrice, quantity));
+   public void addItem(String productId, long unityPrice, int quantity) {
+      String id = UUID.randomUUID().toString();
+      this.orderItems.add(new OrderItem(id, unityPrice, productId, quantity, this.id));
    }
 
    public Long calcTotal() {
@@ -37,6 +40,10 @@ public class Order {
 
       }
       return total;
+   }
+
+   public String getStatus(){
+      return this.status.name();
    }
 
 }

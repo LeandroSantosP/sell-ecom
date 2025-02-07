@@ -1,25 +1,64 @@
 package com.leandrosps.demo_sell_ecom.db;
 
 import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.leandrosps.demo_sell_ecom.domain.Order;
 
-@Repository
 public interface OrderRepository extends ListCrudRepository<OrderDbModel, String>, OrderRepositoryCustom {
 }
 
 interface OrderRepositoryCustom {
-    void save(Order order);
+    void persist(Order order);
+
     Order getOrder(String order_id);
+
     void update(Order order);
 }
 
 class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
+
+    JdbcClient jdbcClient;
+
+    public OrderRepositoryCustomImpl(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
+
     @Override
-    public void save(Order order) {
-        // TODO Auto-generated method stub
-        System.out.println("LOOKS OK!");
+    @Transactional
+    public void persist(Order order) {
+        String sqlCreateOrder = """
+                INSERT INTO
+                    orders (id, total, status, client_id, client_email, created_at)
+                VALUES
+                    (:id, :total, :status, :client_id, :client_email, :created_at)
+                    """;
+        this.jdbcClient.sql(sqlCreateOrder)
+                .param("id", order.getId())
+                .param("total", order.getTotal())
+                .param("status", order.getStatus())
+                .param("client_id", order.getClientId())
+                .param("client_email", order.getClientEmail())
+                .param("created_at", order.getOrderDate())
+                .update();
+
+        for (var item : order.getOrderItems()) {
+            String sqlCreateOrderItem = """
+                    INSERT INTO
+                        order_items (id, unity_price, quantity, order_id, product_id)
+                    VALUES
+                        (:id, :unity_price, :quantity, :order_id, :product_id)
+                    """;
+            this.jdbcClient.sql(sqlCreateOrderItem)
+                    .param("id", item.id())
+                    .param("unity_price", item.unityPrice())
+                    .param("quantity", item.quantity())
+                    .param("order_id", item.orderId())
+                    .param("product_id", item.productId())
+                    .update();
+        }
     }
 
     @Override

@@ -1,4 +1,6 @@
 package com.leandrosps.demo_sell_ecom.db;
 
-public record OrderItemDbModel(String id, String order_id, int quantity) {
+public record OrderItemDbModel(String id, long unity_price, int quantity, String order_id, String product_id) {
 }
+
+// String id, long unityPrice, String productId, int quantity, String orderId

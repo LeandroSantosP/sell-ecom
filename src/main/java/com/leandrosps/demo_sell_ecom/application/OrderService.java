@@ -1,5 +1,6 @@
 package com.leandrosps.demo_sell_ecom.application;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.leandrosps.demo_sell_ecom.db.ClientDbModel;
 import com.leandrosps.demo_sell_ecom.db.OrderDbModel;
+import com.leandrosps.demo_sell_ecom.db.OrderItemDbModel;
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.db.ProductDbModel;
 import com.leandrosps.demo_sell_ecom.domain.Client;
@@ -33,49 +35,72 @@ public class OrderService {
 
 	public String placeOrder(String email, List<ItemInputs> orderItems) {
 		/* Create an repository? who knows */
-		var clientData = this.jdbcClient.sql(/* language=sql */"""
-					SELECT * FROM clients WHERE email = :email
-				""")
-				.param("email", email)
-				.query(ClientDbModel.class)
-				.optional()
-				.orElseThrow(() -> new NotFoundEx());
-
-		Client client = new Client(UUID.fromString(clientData.id()),
-				clientData.name(), clientData.email(),
-				clientData.city(), clientData.birthday(), clientData.create_at());
-
-		var order = Order.create(client.getEmail(), null);
-
-		for (var item : orderItems) {
-			String getProductSql = """
+		
+		 var clientData = this.jdbcClient.sql("""
+			SELECT * FROM clients WHERE email = :email
+			""")
+			.param("email", email)
+			.query(ClientDbModel.class)
+			.optional()
+			.orElseThrow(() -> new NotFoundEx());
+			
+			Client client = new Client(UUID.fromString(clientData.id()),
+			clientData.name(), clientData.email(),
+			clientData.city(), clientData.birthday(), clientData.create_at());
+			
+			var order = Order.create(client.getId().toString(), client.getEmail(), null);
+			
+			for (var item : orderItems) {
+				String getProductSql = """
 					SELECT * FROM products WHERE id = :id
 					""";
-			var productData = this.jdbcClient
+					var productData = this.jdbcClient
 					.sql(getProductSql)
 					.param("id", item.procuct_id())
 					.query(ProductDbModel.class)
 					.optional().orElseThrow(() -> new NotFoundEx());
-			order.addItem(productData.id(), productData.price(), item.quantity());
-		}
+					order.addItem(productData.id(), productData.price(), item.quantity());
+				}
+				
+				List<OrderItemDbModel> itemsDbModel = new ArrayList<>();
+				
+				for (var orderItem : order.getOrderItems()) {
+					itemsDbModel.add(new OrderItemDbModel(orderItem.id(), orderItem.unityPrice(), orderItem.quantity(),
+					orderItem.orderId(), orderItem.productId()));
+				}
+				
+				var orderDbModel = new OrderDbModel(
+					order.getId(),
+					order.getTotal(),
+					order.getStatus(),
+					order.getClientId(),
+					order.getClientEmail(),
+					// itemsDbModel,
+					order.getOrderDate());
 
-		this.orderRepository.save(order);
-		
-		return order.getId();
-	}
+					System.out.println("HERE:: "+ orderDbModel);
 
-	public record GetOrderOutput(String clientEmail, String status, long total, List<OrderItem> items) {
-	}
-
-	public GetOrderOutput getOrder(String orderId) {
-
-		var order = this.orderRepository.getOrder(orderId);
-
-		this.jdbcClient.sql("""
+					if (!this.orderRepository.findById(orderDbModel.id()).isPresent()) {
+						System.out.println("ORDER EXISTES!");
+					}
+					this.orderRepository.persist(order);
+					
+					return order.getId();
+				}
+				
+				public record GetOrderOutput(String clientEmail, String status, long total, List<OrderItem> items) {
+				}
+				
+				public GetOrderOutput getOrder(String orderId) {
+					
+			//	var order = this.orderRepository.getOrder(orderId);
+				
+				this.jdbcClient.sql("""
 					SELECT * FROM orders WHERE id = :id
-				""")
-				.param("id", orderId)
-				.query(OrderDbModel.class);
-		throw new UnsupportedOperationException("Unimplemented method 'getOrder'");
-	}
-}
+					""")
+					.param("id", orderId)
+					.query(OrderDbModel.class);
+					throw new UnsupportedOperationException("Unimplemented method 'getOrder'");
+				}
+			}
+			
