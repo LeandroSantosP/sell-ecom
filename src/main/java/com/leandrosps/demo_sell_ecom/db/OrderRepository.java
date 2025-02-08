@@ -37,7 +37,7 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                     """;
         this.jdbcClient.sql(sqlCreateOrder)
                 .param("id", order.getId())
-                .param("total", order.getTotal())
+                .param("total", order.calcTotal())
                 .param("status", order.getStatus())
                 .param("client_id", order.getClientId())
                 .param("client_email", order.getClientEmail())

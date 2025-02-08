@@ -11,18 +11,7 @@ ALTER TABLE
 ADD
    COLUMN create_at DATETIME DEFAULT (NOW());
 
-INSERT INTO
-   clients (id, name, email, city, birthday)
-VALUES
-   (
-      '1fef5e47-5ab0-4391-b0a0-49592e977578',
-      'João Pereira',
-      'joao@exemplo.com.br',
-      'Rio de Janeiro',
-      '1999-02-06'
-   );
-
-CREATE TABLE brands (
+CREATE TABLE IF NOT EXISTS brands (
    id VARCHAR(150) PRIMARY KEY,
    name VARCHAR(100) NOT NULL,
    img_ref VARCHAR(150)
@@ -39,35 +28,12 @@ CREATE TABLE IF NOT EXISTS products (
 ALTER TABLE
    products
 ADD
-   COLUMN brand_id VARCHAR(150) NOT NULL;
+   COLUMN brand_id VARCHAR(150) NOT NULL AFTER stoke;
 
 ALTER TABLE
    products
 ADD
    FOREIGN KEY (brand_id) REFERENCES brands(id);
-
-INSERT INTO
-   orders (id, total, status, client_id, client_email, created_at)
-VALUES
-   ('1395a4f6-11b9-439e-a59e-7a03f7750834', 100, 'WAITING_PAYMENT', '1fef5e47-5ab0-4391-b0a0-49592e977578', 'joao@exemplo.com.br', '2025-02-07T13:38:06.399843833')
-
-INSERT INTO
-   products (id, name, price, stoke, image_ref)
-VALUES
-   (
-      '284791a5-5a40-4a31-a60c-d2df68997569',
-      'Iphone 16 Pro Apple (256G) - Black Steal',
-      9800.99,
-      20,
-      "http://img.com/2324"
-   );
-
-SELECT
-   name
-FROM
-   products
-WHERE
-   id = "284791a5-5a40-4a31-a60c-d2df68997569";
 
 CREATE TABLE IF NOT EXISTS orders (
    id VARCHAR(150) PRIMARY KEY,

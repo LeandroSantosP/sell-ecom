@@ -27,12 +27,12 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    public record InnerOrderController(@NotEmpty String email, @NotEmpty List<ItemInputs> items) {
+    public record InnerOrderController(@NotEmpty String email, @NotEmpty List<ItemInputs> items, @NotEmpty String getewaytoken) {
     }
 
     @PostMapping("/place-order")
     public ResponseEntity<?> placeOrder(@RequestBody InnerOrderController input) {
-        var product_id = this.orderService.placeOrder(input.email(), input.items());
+        var product_id = this.orderService.placeOrder(input.email(), input.items(), input.getewaytoken());
         return ResponseEntity.ok(product_id);
     }
     

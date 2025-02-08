@@ -39,6 +39,7 @@ public class Order {
          total += item.unityPrice() * item.quantity();
 
       }
+      this.total = total;
       return total;
    }
 
