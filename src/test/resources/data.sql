@@ -8,7 +8,7 @@ VALUES
       'Rio de Janeiro',
       '1999-02-06'
    );
-
+/* 
 INSERT INTO
    orders (
       id,
@@ -26,7 +26,7 @@ VALUES
       '1fef5e47-5ab0-4391-b0a0-49592e977578',
       'joao@exemplo.com.br',
       '2025-02-07 13:38:06'
-   );
+   ); */
 
 
 INSERT INTO 
@@ -41,7 +41,7 @@ VALUES
    (
       '284791a5-5a40-4a31-a60c-d2df68997569',
       'Iphone 16 Pro Apple (256G) - Black Steal',
-      9800.99,
+      210,
       20,
       '291e753d-1861-4dd5-b1dd-acdab2945e66',
       'http://img.com/2324'

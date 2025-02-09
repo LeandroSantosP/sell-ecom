@@ -67,8 +67,6 @@ MODIFY
 AFTER
    client_email;
 
-SHOW CREATE TABLE orders;
-
 CREATE TABLE IF NOT EXISTS order_items (
    id VARCHAR(150) PRIMARY KEY,
    unity_price REAL NOT NULL,

@@ -1,7 +1,6 @@
 package com.leandrosps.demo_sell_ecom.db;
 
 import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,7 +54,7 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                     .param("id", item.id())
                     .param("unity_price", item.unityPrice())
                     .param("quantity", item.quantity())
-                    .param("order_id", item.orderId())
+                    .param("order_id", order.getId())
                     .param("product_id", item.productId())
                     .update();
         }

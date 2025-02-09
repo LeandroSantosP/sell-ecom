@@ -15,17 +15,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class OrderTest {
    @Test
-   @Disabled
    void shouldCreateAnValidTest() {
       ArrayList<OrderItem> orderItems = new ArrayList<>();
-      //String id, long unityPrice, String productId, int quantity, String orderId
-      orderItems.add(new OrderItem("123", 100,"", 2, ""));
-      orderItems.add(new OrderItem("124", 20,"", 2, ""));
-      Order order = Order.create(UUID.randomUUID().toString(),"joao@exemple.com.br", LocalDateTime.now());
+      // String id, long unityPrice, String productId, int quantity, String orderId
+      orderItems.add(new OrderItem("123", 100, "123", 2));
+      orderItems.add(new OrderItem("124", 20, "123", 2));
+      Order order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.br", LocalDateTime.now());
       orderItems.forEach(item -> order.addItem(item.productId(), item.unityPrice(), item.quantity()));
 
       assertEquals(order.calcTotal(), 240, "The total of the order is incorrect!");
-      assertInstanceOf(Long.class, order.getTotal());
+      assertInstanceOf(Long.class, order.getTotal()); 
       assertInstanceOf(Long.class, order.getTotal());
    }
 
@@ -34,4 +33,5 @@ public class OrderTest {
    @ValueSource(strings = { "racecar", "radar", "able was I ere I saw elba" })
    void palindromes(String candidate) {
    }
+
 }
