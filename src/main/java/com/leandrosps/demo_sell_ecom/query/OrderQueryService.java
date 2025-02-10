@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
-import com.leandrosps.demo_sell_ecom.db.ClientDbModel;
+import com.leandrosps.demo_sell_ecom.db.dbmodels.ClientDbModel;
 import com.leandrosps.demo_sell_ecom.domain.OrderItem;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 

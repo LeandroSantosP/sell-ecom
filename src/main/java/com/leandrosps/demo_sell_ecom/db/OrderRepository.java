@@ -4,6 +4,8 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.leandrosps.demo_sell_ecom.db.dbmodels.OrderDbModel;
+import com.leandrosps.demo_sell_ecom.domain.Address;
 import com.leandrosps.demo_sell_ecom.domain.Order;
 
 public interface OrderRepository extends ListCrudRepository<OrderDbModel, String>, OrderRepositoryCustom {
@@ -19,6 +21,7 @@ interface OrderRepositoryCustom {
 
 class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
+    private Address addressDefault = new Address("SP", "Itaquera", null);
     JdbcClient jdbcClient;
 
     public OrderRepositoryCustomImpl(JdbcClient jdbcClient) {
@@ -36,7 +39,8 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                     """;
         this.jdbcClient.sql(sqlCreateOrder)
                 .param("id", order.getId())
-                .param("total", order.calcTotal())
+                /* fix this address later */
+                .param("total", order.calcTotal(addressDefault))
                 .param("status", order.getStatus())
                 .param("client_id", order.getClientId())
                 .param("client_email", order.getClientEmail())

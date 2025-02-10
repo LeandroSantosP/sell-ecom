@@ -1,4 +1,4 @@
-package com.leandrosps.demo_sell_ecom.db;
+package com.leandrosps.demo_sell_ecom.db.dbmodels;
 
 import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
