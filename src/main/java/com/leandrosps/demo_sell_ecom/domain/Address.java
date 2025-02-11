@@ -11,4 +11,9 @@ public class Address {
     private String state;
     private String city;
     private String code;
+    
+    @Override
+    public String toString() {
+        return "Address [state=" + state + ", city=" + city + ", code=" + code + "]";
+    }
 }

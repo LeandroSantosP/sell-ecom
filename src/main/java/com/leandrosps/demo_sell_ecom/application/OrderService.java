@@ -1,11 +1,9 @@
 package com.leandrosps.demo_sell_ecom.application;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collector;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +12,12 @@ import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.db.ProductRepository;
 import com.leandrosps.demo_sell_ecom.db.dbmodels.ClientDbModel;
 import com.leandrosps.demo_sell_ecom.db.dbmodels.OrderDbModel;
+import com.leandrosps.demo_sell_ecom.domain.Address;
 import com.leandrosps.demo_sell_ecom.domain.Client;
 import com.leandrosps.demo_sell_ecom.domain.Order;
 import com.leandrosps.demo_sell_ecom.domain.OrderItem;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
+import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
 
 @Service
 public class OrderService {
@@ -26,24 +26,26 @@ public class OrderService {
 	private OrderRepository orderRepository;
 	private ProductRepository productRepository;
 	private ClientRepository clientRepository;
+	
+	private AdressGeteWay adressGeteWay;
 
 	public OrderService(JdbcClient jdbcClient, OrderRepository orderRepository, ProductRepository productRepository,
-			ClientRepository clientRepository) {
+			ClientRepository clientRepository, @Qualifier("fakeHttpClientGeteway") AdressGeteWay adressGeteWay) {
 		this.jdbcClient = jdbcClient;
 		this.orderRepository = orderRepository;
 		this.productRepository = productRepository;
 		this.clientRepository = clientRepository;
+		this.adressGeteWay = adressGeteWay;
 	}
 
 	public record ItemInputs(String procuct_id, Integer quantity) {
 	}
 
-	public record PlaceOrderinput() {
-	}
-
-	public String placeOrder(String email, List<ItemInputs> orderItems, String gatewayToken) {
+	public String placeOrder(String email, List<ItemInputs> orderItems, String gatewayToken, String addressCode, String coupon) {
+		;
 		/* Create an repository? who knows */
 		ClientDbModel clientData = this.clientRepository.findByEmail(email).orElseThrow(() -> new NotFoundEx());
+		Address address = adressGeteWay.getAdress(addressCode);
 
 		Client client = new Client(UUID.fromString(clientData.id()), clientData.name(), clientData.email(),
 				clientData.city(), clientData.birthday(), clientData.create_at());
@@ -56,9 +58,8 @@ public class OrderService {
 			order.addItem(productData.price(), item.quantity(), productData.id());
 		}
 
+		order.calcTotal(address);
 		this.orderRepository.persist(order);
-		var result = this.orderRepository.findById(order.getId());
-		System.out.println(result.get());
 		return order.getId();
 	}
 

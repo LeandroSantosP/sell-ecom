@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS products (
 ALTER TABLE
    products
 ADD
-   COLUMN brand_id VARCHAR(150) NOT NULL AFTER stoke;
+   COLUMN brand_id VARCHAR(150) NOT NULL
+AFTER
+   stoke;
 
 ALTER TABLE
    products

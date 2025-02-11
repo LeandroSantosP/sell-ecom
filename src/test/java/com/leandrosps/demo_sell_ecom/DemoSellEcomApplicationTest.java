@@ -2,10 +2,8 @@ package com.leandrosps.demo_sell_ecom;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("test")
 public class DemoSellEcomApplicationTest {
     @Test
     void testMain() {

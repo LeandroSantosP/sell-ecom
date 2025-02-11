@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -26,7 +24,6 @@ public class OrderTest {
    }
 
    @Test
-   @Disabled
    void shouldCreateAnValidTest() {
       Order order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.br", LocalDateTime.now());
       orderItems.forEach(item -> order.addItem(item.unityPrice(), item.quantity(), item.productId()));
@@ -36,7 +33,6 @@ public class OrderTest {
    }
 
    @Test
-   @Disabled
    void shouldBeAbleToAddAnCupomOf20off() {
       var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", LocalDateTime.now());
       order.addItems(orderItems.toArray(new OrderItem[0]));
