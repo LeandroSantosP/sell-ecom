@@ -8,8 +8,11 @@ import org.springframework.stereotype.Service;
 
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.db.dbmodels.ClientDbModel;
+import com.leandrosps.demo_sell_ecom.db.dbmodels.OrderDbModel;
 import com.leandrosps.demo_sell_ecom.db.dbmodels.OrderItemDbModel;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
+
+import lombok.Getter;
 
 @Service
 public class OrderQueryService {
@@ -31,16 +34,24 @@ public class OrderQueryService {
             Long orderTotal, String orderStatus, LocalDateTime orderCreatedAt, List<OrderItemDbModel> orderItems) {
     }
 
-    public record GetOrderByIdOuput() {
+    class GetOrderByIdOuput extends OrderDbModel {
+        @Getter
+        private List<OrderItemDbModel> orderItems;
+
+        public GetOrderByIdOuput(String id, Long total, String status, String client_id, String client_email,
+                LocalDateTime created_at, List<OrderItemDbModel> orderItems) {
+            super(id, total, status, client_id, client_email, created_at);
+            this.orderItems = orderItems;
+        }
     }
 
     public GetOrderByIdOuput getOrderById(String order_id) {
         var orderData = orderRepository.findById(order_id).orElseThrow(() -> new NotFoundEx("Order Not exists!"));
-        List<OrderItemDbModel> orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
-                .param("order_id", orderData.id()).query(OrderItemDbModel.class).list();
+        var orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
+                .param("order_id", orderData.getId()).query(OrderItemDbModel.class).list();
 
-        return null;
-
+        return new GetOrderByIdOuput(orderData.getId(), orderData.getTotal(), orderData.getStatus(),
+                orderData.getClient_id(), orderData.getClient_email(), orderData.getCreated_at(), orderItems);
     }
 
     public List<GetOrdersOfAClientOutPut> getOrdersOfAClient(String client_id, String status) {
@@ -77,5 +88,4 @@ public class OrderQueryService {
 
         return result;
     }
-
 }

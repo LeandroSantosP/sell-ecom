@@ -42,7 +42,6 @@ public class OrderService {
 	}
 
 	public String placeOrder(String email, List<ItemInputs> orderItems, String gatewayToken, String addressCode, String coupon) {
-		;
 		/* Create an repository? who knows */
 		ClientDbModel clientData = this.clientRepository.findByEmail(email).orElseThrow(() -> new NotFoundEx());
 		Address address = adressGeteWay.getAdress(addressCode);

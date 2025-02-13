@@ -116,7 +116,6 @@ public class OrderServiceTest {
     }
 
     @Test
-    @Tag("currnet")
     void shouldBeAbleToAddAnCouponToTheOrder() {
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 5));

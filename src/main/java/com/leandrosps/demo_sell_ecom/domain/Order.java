@@ -19,11 +19,8 @@ public class Order {
    private Status status;
    private LocalDateTime orderDate;
    private List<OrderItem> orderItems;
-   private List<Coupon> coupons;
+   private List<MyCoupon> coupons;
    private Long total;
-
-   private record Coupon(String code, Double percentage) {
-   }
 
    public static Order create(String clientId, String clientEmail, LocalDateTime orderDate) {
       if (orderDate == null) {
@@ -46,8 +43,8 @@ public class Order {
       }
    }
 
-   public void addCoupon(String code, double percentage) {
-      this.coupons.add(new Coupon(code, percentage));
+   public void addCoupon(MyCoupon coupon) {
+      this.coupons.add(coupon);
    }
 
    public Long calcTotal(Address address) {
@@ -60,11 +57,11 @@ public class Order {
       var feesCalculator = StateFessCalculatorFactory.create(address.getState());
       var stateFees = feesCalculator.calctateStateFees(total.doubleValue());
       total += (long) stateFees;
-      
-      for (Coupon coupon : this.coupons) {
-         total -= (long) (coupon.percentage() / 100 * total);
+
+      for (MyCoupon coupon : this.coupons) {
+         total -= (long) coupon.calcDiscountIn(total);
       }
-      
+
       this.total = total;
       return total;
    }

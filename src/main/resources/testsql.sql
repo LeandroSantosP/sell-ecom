@@ -7,3 +7,5 @@ SELECT
 FROM
     clients AS c
     INNER JOIN orders AS o ON (c.id = o.client_id);
+
+

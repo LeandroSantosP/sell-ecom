@@ -3,6 +3,7 @@ package com.leandrosps.demo_sell_ecom.domain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +37,16 @@ public class OrderTest {
    void shouldBeAbleToAddAnCupomOf20off() {
       var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", LocalDateTime.now());
       order.addItems(orderItems.toArray(new OrderItem[0]));
-      double percentage = 20;
-      order.addCoupon("SAVE20", percentage);
+      int percentage = 20;
+      var coupon = MyCoupon.craetes("SAVE20", percentage, true, 2, 0, LocalDate.of(2024, 03, 21));
+
+      order.addCoupon(coupon);
       assertEquals(192, order.calcTotal(addressDefault), "The total of the order is incorrect!");
    }
 
    @Test
    void shouldChangerStateFess() {
-       Address adress = new Address("SP", "Itaquera", null); // 5.0
+      Address adress = new Address("SP", "Itaquera", null); // 5.0
       var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", LocalDateTime.now());
       order.addItems(orderItems.toArray(new OrderItem[0]));
       assertEquals(252, order.calcTotal(adress), "The total of the order is incorrect!");
@@ -51,6 +54,7 @@ public class OrderTest {
 
    @ParameterizedTest
    @DisplayName("╯°□°）╯")
+   @Tag("test1")
    @ValueSource(strings = { "racecar", "radar", "able was I ere I saw elba" })
    void palindromes(String candidate) {
    }
