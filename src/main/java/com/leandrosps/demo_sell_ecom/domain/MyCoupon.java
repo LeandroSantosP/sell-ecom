@@ -1,6 +1,9 @@
 package com.leandrosps.demo_sell_ecom.domain;
 
 import java.time.LocalDate;
+
+import com.leandrosps.demo_sell_ecom.errors.CouponUsageLimitEx;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -21,14 +24,17 @@ public class MyCoupon {
     }
 
     public double calcDiscountIn(double value) {
+        this.increaseUsage();
         return (value * this.percentage) / 100;
     }
 
-    public void increaseUsage() {
-        if (this.used == this.quantity) {
-            throw new RuntimeException();
+    private void increaseUsage() {
+        if (this.used + 1 > this.quantity) {
+            throw new CouponUsageLimitEx(this.code);
         }
-
+        if (this.used + 1 == this.quantity) {
+            this.isAvailable = false;
+        }
         this.used++;
     }
 

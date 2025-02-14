@@ -72,6 +72,9 @@ public class OrderService {
 
 		order.calcTotal(address); /* calc the total */
 		this.orderRepository.persist(order);
+		for (MyCoupon myCoupon : order.getCoupons()) {
+			this.couponRepository.update(myCoupon);
+		}
 		return order.getId();
 	}
 

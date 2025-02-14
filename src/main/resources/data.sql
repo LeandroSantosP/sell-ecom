@@ -51,3 +51,7 @@ INSERT INTO coupons
    (code, percentage, usage_limit, is_available, expired_at)
 VALUES
    ('SAVE10', 10, 2, 1, '2025-02-14');
+
+
+
+UPDATE coupons

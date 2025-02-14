@@ -38,12 +38,19 @@ class CouponRepositoryCustomImpl implements CouponRepositoryCustom {
 
     @Override
     public void update(MyCoupon coupon) {
-        String sqlUpdateCoupon = """
+            String sqlUpdateCoupon = """
                 UPDATE coupons
-                SET used = true
+                SET used = :used,
+                    is_available = :is_available,
+                    expired_at = :expired_at
                 WHERE code = :code
                 """;
+            this.jdbcClient.sql(sqlUpdateCoupon)
+                .param("used", coupon.getUsed())
+                .param("is_available", coupon.isAvailable())
+                .param("expired_at", coupon.getExpiredAt())
+                .param("code", coupon.getCode())
+                .update();
         this.jdbcClient.sql(sqlUpdateCoupon).param("code", coupon).update();
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 }

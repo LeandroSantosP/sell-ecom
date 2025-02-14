@@ -56,7 +56,6 @@ public class Order {
 
       for (MyCoupon coupon : this.coupons) {
          total -= (long) coupon.calcDiscountIn(total);
-         coupon.increaseUsage();
       }
       
       this.total = total;
