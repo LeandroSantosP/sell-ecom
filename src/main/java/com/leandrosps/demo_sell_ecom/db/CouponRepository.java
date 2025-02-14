@@ -11,8 +11,8 @@ public interface CouponRepository extends ListCrudRepository<CouponDbModel, Stri
 }
 
 interface CouponRepositoryCustom {
+    void persiste(MyCoupon coupon);
     MyCoupon getByCode(String code);
-
     void update(MyCoupon coupon);
 }
 
@@ -21,6 +21,27 @@ class CouponRepositoryCustomImpl implements CouponRepositoryCustom {
 
     public CouponRepositoryCustomImpl(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
+    }
+
+    @Override
+    public void persiste(MyCoupon coupon) {
+        String sqlInsertCoupon = """
+            INSERT INTO coupons (code, percentage, is_available, usage_limit, used, expired_at, created_at)
+            VALUES (:code, :percentage, :is_available, :usage_limit, :used, :expired_at, :created_at)
+            """;
+
+        this.jdbcClient.sql(sqlInsertCoupon)
+            .param("code", coupon.getCode())
+            .param("percentage", coupon.getPercentage())
+            .param("is_available", coupon.isAvailable())
+            .param("usage_limit", coupon.getQuantity())
+            .param("used", coupon.getUsed())
+            .param("expired_at", coupon.getExpiredAt())
+            .param("created_at", coupon.getCreatedAt())
+            .update();
+        this.jdbcClient.sql("""
+                INSERT INTO coupons () VALUES ()
+                """).update();
     }
 
     @Override
@@ -38,19 +59,20 @@ class CouponRepositoryCustomImpl implements CouponRepositoryCustom {
 
     @Override
     public void update(MyCoupon coupon) {
-            String sqlUpdateCoupon = """
-                UPDATE coupons
-                SET used = :used,
-                    is_available = :is_available,
-                    expired_at = :expired_at
-                WHERE code = :code
-                """;
+        
+        String sqlUpdateCoupon = """
+            UPDATE coupons
+            SET used = :used,
+            is_available = :is_available,
+            expired_at = :expired_at
+            WHERE code = :code
+            """;
+
             this.jdbcClient.sql(sqlUpdateCoupon)
-                .param("used", coupon.getUsed())
-                .param("is_available", coupon.isAvailable())
-                .param("expired_at", coupon.getExpiredAt())
-                .param("code", coupon.getCode())
-                .update();
-        this.jdbcClient.sql(sqlUpdateCoupon).param("code", coupon).update();
+            .param("code", coupon.getCode())
+            .param("used", coupon.getUsed())
+            .param("is_available", coupon.isAvailable())
+            .param("expired_at", coupon.getExpiredAt())
+            .update();
     }
 }

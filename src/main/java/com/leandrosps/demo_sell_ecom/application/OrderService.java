@@ -1,5 +1,6 @@
 package com.leandrosps.demo_sell_ecom.application;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import com.leandrosps.demo_sell_ecom.domain.Order;
 import com.leandrosps.demo_sell_ecom.domain.OrderItem;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
+import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 
 @Service
 public class OrderService {
@@ -30,18 +32,20 @@ public class OrderService {
 	private ProductRepository productRepository;
 	private ClientRepository clientRepository;
 	private CouponRepository couponRepository;
+	private MyClock clock;
 
 	private AdressGeteWay adressGeteWay;
 
 	public OrderService(JdbcClient jdbcClient, OrderRepository orderRepository, ProductRepository productRepository,
 			ClientRepository clientRepository, @Qualifier("fakeHttpClientGeteway") AdressGeteWay adressGeteWay,
-			CouponRepository couponRepository) {
+			CouponRepository couponRepository, MyClock clock) {
 		this.jdbcClient = jdbcClient;
 		this.orderRepository = orderRepository;
 		this.productRepository = productRepository;
 		this.clientRepository = clientRepository;
 		this.adressGeteWay = adressGeteWay;
 		this.couponRepository = couponRepository;
+		this.clock = clock;
 	}
 
 	public record ItemInputs(String procuct_id, Integer quantity) {
@@ -56,7 +60,7 @@ public class OrderService {
 		Client client = new Client(UUID.fromString(clientData.id()), clientData.name(), clientData.email(),
 				clientData.city(), clientData.birthday(), clientData.create_at());
 
-		var order = Order.create(client.getId().toString(), client.getEmail());
+		var order = Order.create(client.getId().toString(), client.getEmail(), this.clock);
 
 		for (var item : orderItems) {
 			var productData = this.productRepository.findById(item.procuct_id())

@@ -51,4 +51,4 @@ VALUES
 INSERT INTO coupons
    (code, percentage, usage_limit, used, is_available, expired_at)
 VALUES
-   ('SAVE10', 10, 2, 1, 1, '2025-02-14');
+   ('SAVE10', 10, 2, 0, 1, '2025-3-14');

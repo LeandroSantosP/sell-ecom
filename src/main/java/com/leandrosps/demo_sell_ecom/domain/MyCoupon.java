@@ -18,9 +18,9 @@ public class MyCoupon {
     private LocalDate expiredAt;
     private LocalDate createdAt;
 
-    static public MyCoupon craetes(String code, int percentage, boolean isAvailable, int quantity, int used,
+    static public MyCoupon craete(String code, int percentage, boolean isAvailable, int quantity,
             LocalDate expiredAt) {
-        return new MyCoupon(code, percentage, isAvailable, quantity, used, expiredAt, LocalDate.now());
+        return new MyCoupon(code, percentage, isAvailable, quantity, 0, expiredAt, LocalDate.now());
     }
 
     public double calcDiscountIn(double value) {

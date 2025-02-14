@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +27,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.leandrosps.demo_sell_ecom.application.OrderService.ItemInputs;
 import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
-import com.leandrosps.demo_sell_ecom.db.dbmodels.CouponDbModel;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 
-// 15
-//  
+@SuppressWarnings("rawtypes")
 @SpringBootTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -53,14 +50,16 @@ public class OrderServiceTest {
     @Autowired
     private OrderRepository orderRepository;
 
+
+    @Autowired
+    private CouponRepository couponRepository;
+
     @Autowired
     private OrderService orderService;
 
     @Autowired
     private OrderQueryService orderQueryService;
 
-    @Autowired
-    private CouponRepository couponRepository;
 
     @Test
     void testMySqlConn() {
@@ -80,7 +79,7 @@ public class OrderServiceTest {
 
     private static String client_id_db = "1fef5e47-5ab0-4391-b0a0-49592e977578";
 
-    private String PAYMENT_API_AUTH_TOKEN = "can be a jwt!";
+   // private String PAYMENT_API_AUTH_TOKEN = "can be a jwt!";
 
     @Test
     void shouldPlaceAnOrderAndConsult() {
@@ -98,6 +97,7 @@ public class OrderServiceTest {
         assertThat(createOrderOutput).isNotEmpty();
 
         var output = orderQueryService.getOrdersOfAClient(client_id_db, "WAITING_PAYMENT");
+
         assertAll("Gruped Assertions of Client's Order", () -> {
             assertEquals(output.size(), 1);
             var result = output.get(0);
@@ -123,16 +123,17 @@ public class OrderServiceTest {
     }
 
     @Test
-    @Tag("current")
     void shouldBeAbleToAddAnCouponToTheOrder() {
                 List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 5));
         var id = assertDoesNotThrow(
                 () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", "SAVE10"));
-        System.out.println("id:"+id);
+
         var order = this.orderQueryService.getOrderById(id);
-        couponRepository.findById("SAVE10");
         assertThat(order.getTotal()).isEqualTo(945);
         assertEquals("SAVE10", order.getCoupon());
+
+        var usedCoupon  = couponRepository.findById("SAVE10").get();
+        assertEquals(1, usedCoupon.getUsed()); /* coupon used */
     }
 }

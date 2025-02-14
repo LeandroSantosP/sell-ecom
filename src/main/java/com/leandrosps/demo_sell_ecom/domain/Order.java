@@ -1,11 +1,14 @@
 package com.leandrosps.demo_sell_ecom.domain;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.leandrosps.demo_sell_ecom.errors.ExpiredCoupon;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
+import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,16 +20,18 @@ public class Order {
    private String clientId;
    private String clientEmail;
    private Status status;
-   private LocalDateTime orderDate;
    private List<OrderItem> orderItems;
    private List<MyCoupon> coupons;
    private Long total;
+   private LocalDate createAt;
+   private LocalDateTime orderDate;
+   private MyClock clock;
 
-   public static Order create(String clientId, String clientEmail) {
+   public static Order create(String clientId, String clientEmail, MyClock clock) {
       var inital_status = Status.WAITING_PAYMENT;
 
-      return new Order(UUID.randomUUID().toString(), clientId, clientEmail, inital_status,  LocalDateTime.now(), new ArrayList<>(),
-            new ArrayList<>(), 0L);
+      return new Order(UUID.randomUUID().toString(), clientId, clientEmail, inital_status, new ArrayList<>(),
+            new ArrayList<>(), 0L, clock.getCurrentDate().toLocalDate(), clock.getCurrentDate(), clock);
    }
 
    public void addItem(long unityPrice, int quantity, String productId) {
@@ -41,6 +46,9 @@ public class Order {
    }
 
    public void addCoupon(MyCoupon coupon) {
+      if (!coupon.isValid(this.getCreateAt())) {
+         throw new ExpiredCoupon();
+      }
       this.coupons.add(coupon);
    }
 
@@ -57,7 +65,7 @@ public class Order {
       for (MyCoupon coupon : this.coupons) {
          total -= (long) coupon.calcDiscountIn(total);
       }
-      
+
       this.total = total;
       return total;
    }

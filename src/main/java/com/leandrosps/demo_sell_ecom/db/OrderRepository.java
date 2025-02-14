@@ -29,26 +29,23 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     @Override
     @Transactional
     public void persist(Order order) {
+        String coupon = null;
+        if (order.getCoupons().size() > 0) {
+            coupon = order.getCoupons().get(0).getCode();
+        }
+
         String sqlCreateOrder = """
                 INSERT INTO
                     orders (id, total, status, client_id, client_email, coupon, created_at)
                 VALUES
                     (:id, :total, :status, :client_id, :client_email, :coupon, :created_at)
                     """;
-        System.out.println("HERE: " + order.getCoupons().get(0).getCode());
-
-        String coupon = null;
-        if (!order.getCoupons().isEmpty()) {
-            coupon = order.getCoupons().get(0).getCode();
-        }
 
         this.jdbcClient.sql(sqlCreateOrder).param("id", order.getId())
                 /* fix this address later */
                 .param("total", order.getTotal()).param("status", order.getStatus())
                 .param("client_id", order.getClientId()).param("client_email", order.getClientEmail())
                 .param("coupon", coupon).param("created_at", order.getOrderDate()).update();
-
-      
 
         for (var item : order.getOrderItems()) {
             String sqlCreateOrderItem = """
