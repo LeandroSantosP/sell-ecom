@@ -27,20 +27,21 @@ public class OrderQueryService {
     }
 
     public record GetOrderData(String orderId, String clientId, String clientName, String clientEmail, Long orderTotal,
-            String orderStatus, LocalDateTime orderCreatedAt) {
+            String orderStatus, String orderCoupon, LocalDateTime orderCreatedAt) {
     }
 
     public record GetOrdersOfAClientOutPut(String orderId, String clientId, String clientName, String clientEmail,
-            Long orderTotal, String orderStatus, LocalDateTime orderCreatedAt, List<OrderItemDbModel> orderItems) {
+            Long orderTotal, String orderStatus, String orderCoupon, LocalDateTime orderCreatedAt,
+            List<OrderItemDbModel> orderItems) {
     }
 
-    class GetOrderByIdOuput extends OrderDbModel {
+    public class GetOrderByIdOuput extends OrderDbModel {
         @Getter
         private List<OrderItemDbModel> orderItems;
 
         public GetOrderByIdOuput(String id, Long total, String status, String client_id, String client_email,
-                LocalDateTime created_at, List<OrderItemDbModel> orderItems) {
-            super(id, total, status, client_id, client_email, created_at);
+                String coupon, LocalDateTime created_at, List<OrderItemDbModel> orderItems) {
+            super(id, total, status, client_id, client_email, coupon, created_at);
             this.orderItems = orderItems;
         }
     }
@@ -49,9 +50,9 @@ public class OrderQueryService {
         var orderData = orderRepository.findById(order_id).orElseThrow(() -> new NotFoundEx("Order Not exists!"));
         var orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
                 .param("order_id", orderData.getId()).query(OrderItemDbModel.class).list();
-
         return new GetOrderByIdOuput(orderData.getId(), orderData.getTotal(), orderData.getStatus(),
-                orderData.getClient_id(), orderData.getClient_email(), orderData.getCreated_at(), orderItems);
+                orderData.getClient_id(), orderData.getClient_email(), orderData.getCoupon(), orderData.getCreated_at(),
+                orderItems);
     }
 
     public List<GetOrdersOfAClientOutPut> getOrdersOfAClient(String client_id, String status) {
@@ -66,6 +67,7 @@ public class OrderQueryService {
                     c.email AS clientEmail,
                     o.total as orderTotal,
                     o.status as orderStatus,
+                    o.coupon as orderCoupon,
                     o.created_at as orderCreatedAt
                 FROM
                     clients AS c
@@ -81,9 +83,10 @@ public class OrderQueryService {
         orders.forEach(order -> {
             List<OrderItemDbModel> orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
                     .param("order_id", order.orderId()).query(OrderItemDbModel.class).list();
-
+            
             result.add(new GetOrdersOfAClientOutPut(order.orderId(), order.clientId(), order.clientName(),
-                    order.clientEmail(), order.orderTotal(), order.orderStatus(), order.orderCreatedAt(), orderItems));
+                    order.clientEmail(), order.orderTotal(), order.orderStatus(), order.orderCoupon(), order.orderCreatedAt(),
+                    orderItems));
         });
 
         return result;

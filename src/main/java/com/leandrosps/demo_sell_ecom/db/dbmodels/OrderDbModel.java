@@ -17,5 +17,6 @@ public class OrderDbModel {
     @Column("status") String status;
     @Column("client_id") String client_id;
     @Column("client_email") String client_email;
+    @Column("coupon") String coupon;
     @Column("created_at") LocalDateTime created_at;
 }

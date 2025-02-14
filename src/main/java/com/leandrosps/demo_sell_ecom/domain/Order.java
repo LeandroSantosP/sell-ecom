@@ -22,13 +22,10 @@ public class Order {
    private List<MyCoupon> coupons;
    private Long total;
 
-   public static Order create(String clientId, String clientEmail, LocalDateTime orderDate) {
-      if (orderDate == null) {
-         orderDate = LocalDateTime.now();
-      }
+   public static Order create(String clientId, String clientEmail) {
       var inital_status = Status.WAITING_PAYMENT;
 
-      return new Order(UUID.randomUUID().toString(), clientId, clientEmail, inital_status, orderDate, new ArrayList<>(),
+      return new Order(UUID.randomUUID().toString(), clientId, clientEmail, inital_status,  LocalDateTime.now(), new ArrayList<>(),
             new ArrayList<>(), 0L);
    }
 
@@ -53,15 +50,15 @@ public class Order {
       for (var item : this.orderItems) {
          total += item.unityPrice() * item.quantity();
       }
-
       var feesCalculator = StateFessCalculatorFactory.create(address.getState());
       var stateFees = feesCalculator.calctateStateFees(total.doubleValue());
       total += (long) stateFees;
 
       for (MyCoupon coupon : this.coupons) {
          total -= (long) coupon.calcDiscountIn(total);
+         coupon.increaseUsage();
       }
-
+      
       this.total = total;
       return total;
    }

@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS products (
 ALTER TABLE
    products
 ADD
-   COLUMN brand_id VARCHAR(150) NOT NULL AFTER stoke;
+   COLUMN brand_id VARCHAR(150) NOT NULL
+AFTER
+   stoke;
 
 ALTER TABLE
    products
@@ -67,8 +69,6 @@ MODIFY
 AFTER
    client_email;
 
-SHOW CREATE TABLE orders;
-
 CREATE TABLE IF NOT EXISTS order_items (
    id VARCHAR(150) PRIMARY KEY,
    unity_price REAL NOT NULL,
@@ -88,12 +88,20 @@ CREATE TABLE IF NOT EXISTS coupons (
    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE
-   orders
-ADD
-   COLUMN coupon VARCHAR(150);
 
 ALTER TABLE
    orders
 ADD
-   FOREIGN KEY (coupon) REFERENCES coupons(code);
+   COLUMN coupon VARCHAR(150) AFTER client_email;
+
+ALTER TABLE
+   orders
+ADD
+   FOREIGN KEY (coupon) REFERENCES coupons(code) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE
+   coupons
+ADD
+   COLUMN used INTEGER NOT NULL DEFAULT 0
+AFTER
+   usage_limit;

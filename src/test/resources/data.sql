@@ -47,7 +47,8 @@ VALUES
       'http://img.com/2324'
    );
 
+
 INSERT INTO coupons
-   (code, percentage, usage_limit, is_available, expired_at)
+   (code, percentage, usage_limit, used, is_available, expired_at)
 VALUES
-   ('SAVE10', 10, 2, 1, '2025-02-14');
+   ('SAVE10', 10, 2, 1, 1, '2025-02-14');

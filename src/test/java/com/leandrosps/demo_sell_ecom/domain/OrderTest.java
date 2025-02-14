@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +25,7 @@ public class OrderTest {
 
    @Test
    void shouldCreateAnValidTest() {
-      Order order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.br", LocalDateTime.now());
+      Order order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.br");
       orderItems.forEach(item -> order.addItem(item.unityPrice(), item.quantity(), item.productId()));
       assertEquals(240, order.calcTotal(addressDefault), "The total of the order is incorrect!");
       assertInstanceOf(Long.class, order.getTotal());
@@ -35,7 +34,7 @@ public class OrderTest {
 
    @Test
    void shouldBeAbleToAddAnCupomOf20off() {
-      var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", LocalDateTime.now());
+      var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.");
       order.addItems(orderItems.toArray(new OrderItem[0]));
       int percentage = 20;
       var coupon = MyCoupon.craetes("SAVE20", percentage, true, 2, 0, LocalDate.of(2024, 03, 21));
@@ -47,14 +46,13 @@ public class OrderTest {
    @Test
    void shouldChangerStateFess() {
       Address adress = new Address("SP", "Itaquera", null); // 5.0
-      var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", LocalDateTime.now());
+      var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.");
       order.addItems(orderItems.toArray(new OrderItem[0]));
       assertEquals(252, order.calcTotal(adress), "The total of the order is incorrect!");
    }
 
    @ParameterizedTest
    @DisplayName("╯°□°）╯")
-   @Tag("test1")
    @ValueSource(strings = { "racecar", "radar", "able was I ere I saw elba" })
    void palindromes(String candidate) {
    }
