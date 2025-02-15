@@ -75,6 +75,16 @@ public class Order {
       return this.status.name();
    }
 
+   public void updated_status(String status) {
+      if (status.equals("PAYED")) {
+         this.status = Status.PAYED;
+      } else if (status.equals("cancel")) {
+         this.status = Status.CANCEL;
+         return;
+      } 
+      throw new RuntimeException("Invalid Status");
+   }
+
 }
 
 class StateFessCalculatorFactory {

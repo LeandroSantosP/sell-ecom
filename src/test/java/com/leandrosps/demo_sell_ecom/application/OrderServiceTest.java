@@ -154,13 +154,29 @@ public class OrderServiceTest {
     }
 
     @Test
+    void shouldBeAbleToGetAnOrder() {
+        List<ItemInputs> itemsInput = new ArrayList<>();
+        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
+        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null);
+        var order = this.orderRepository.getOrder(order_id);
+
+        assertEquals(1, order.getOrderItems().size());
+        var orderItem = order.getOrderItems().get(0);
+        assertNotNull(orderItem.id());
+        assertEquals("284791a5-5a40-4a31-a60c-d2df68997569", orderItem.productId());
+        assertEquals("WAITING_PAYMENT", order.getStatus());
+        assertEquals(630, order.getTotal());
+        assertTrue(order.getClientEmail().equals("joao@exemplo.com.br"));
+    }
+
+    @Test
     @Tag("current")
     void shouldCalculateTheOrderWithStateFessAndCouponDiscount() {
         Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
 
-        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null);
+        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "62887c55-38b2-4099-9e0c-1674756ea315", "36300008", null);
         var order = this.orderRepository.getOrder(order_id);
         assertEquals(661, order.getTotal());
         assertEquals(1, order.getOrderItems().size());
@@ -169,24 +185,10 @@ public class OrderServiceTest {
         assertEquals("284791a5-5a40-4a31-a60c-d2df68997569", orderItem.productId());
         assertEquals("WAITING_PAYMENT", order.getStatus());
         assertTrue(order.getClientEmail().equals("joao@exemplo.com.br"));
-
     }
 
     @Test
-    @Disabled
-    void shouldBeAbleToGetAnOrder() {
-        List<ItemInputs> itemsInput = new ArrayList<>();
-        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
-        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null);
-        var order = this.orderService.getOrder(order_id);
-
-        assertEquals(1, order.items().size());
-        var orderItem = order.items().get(0);
-        assertNotNull(orderItem.id());
-        assertEquals("284791a5-5a40-4a31-a60c-d2df68997569", orderItem.productId());
-        assertEquals("WAITING_PAYMENT", order.status());
-        assertEquals(661, order.total());
-        assertTrue(order.clientEmail().equals("joao@exemplo.com.br"));
+    void shouldProcessAnPaymentAndChangeTheStatusToPayed() {
+        
     }
-
 }

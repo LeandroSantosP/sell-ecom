@@ -40,6 +40,8 @@ class HttpClientGeteway implements AdressGeteWay {
     @Override
     public Address getAdress(String code) {
         try {
+            String s = "";
+
             HttpRequest request = HttpRequest.newBuilder().uri(new URI("https://viacep.com.br/ws/" + code + "/json/"))
                     .GET().version(HttpClient.Version.HTTP_2).build();
 
@@ -57,6 +59,7 @@ class HttpClientGeteway implements AdressGeteWay {
                 logger.error("Request failed with status code: " + response.statusCode());
                 throw new InvalidAddress(code);
             }
+
 
             return new Address(body.getString("uf"), body.getString("localidade"), body.getString("cep"));
         } catch (URISyntaxException | IOException | InterruptedException e) {

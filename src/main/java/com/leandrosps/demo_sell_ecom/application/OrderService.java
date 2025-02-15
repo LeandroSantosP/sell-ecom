@@ -23,6 +23,7 @@ import com.leandrosps.demo_sell_ecom.domain.OrderItem;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
 import com.leandrosps.demo_sell_ecom.geteways.MyClock;
+import com.leandrosps.demo_sell_ecom.geteways.PaymentGeteWay;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,18 +37,20 @@ public class OrderService {
 	private ClientRepository clientRepository;
 	private CouponRepository couponRepository;
 	private MyClock clock;
+	private PaymentGeteWay paymentGeteWay;
 
 	private AdressGeteWay adressGeteWay;
 
 	public OrderService(JdbcClient jdbcClient, OrderRepository orderRepository, ProductRepository productRepository,
 			ClientRepository clientRepository, AdressGeteWay adressGeteWay,
-			CouponRepository couponRepository, MyClock clock) {
+			CouponRepository couponRepository, PaymentGeteWay paymentGeteWay, MyClock clock) {
 		this.jdbcClient = jdbcClient;
 		this.orderRepository = orderRepository;
 		this.productRepository = productRepository;
 		this.clientRepository = clientRepository;
 		this.adressGeteWay = adressGeteWay;
 		this.couponRepository = couponRepository;
+		this.paymentGeteWay = paymentGeteWay;
 		this.clock = clock;
 	}
 
@@ -74,8 +77,11 @@ public class OrderService {
 			MyCoupon coupon = this.couponRepository.getByCode(couponCode);
 			order.addCoupon(coupon);
 		}
-
-		Address address = adressGeteWay.getAdress(addressCode);
+	 	var response = this.paymentGeteWay.execut(gatewayToken);
+	 	if (response.status_code() != 200 || !response.body().equals(gatewayToken)) {
+			/* Failed on payment - Undo everything ?? */
+		}	
+	 	Address address = adressGeteWay.getAdress(addressCode);
 		order.calcTotal(address); /* calc the total */
 		
 		this.orderRepository.persist(order);
