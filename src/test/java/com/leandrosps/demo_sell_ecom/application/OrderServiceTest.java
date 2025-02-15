@@ -2,7 +2,9 @@ package com.leandrosps.demo_sell_ecom.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -14,11 +16,17 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -27,10 +35,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.leandrosps.demo_sell_ecom.application.OrderService.ItemInputs;
 import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
+import com.leandrosps.demo_sell_ecom.domain.Address;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
+import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 
-@SuppressWarnings("rawtypes")
 @SpringBootTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -50,21 +59,24 @@ public class OrderServiceTest {
     @Autowired
     private OrderRepository orderRepository;
 
-
     @Autowired
     private CouponRepository couponRepository;
-
-    @Autowired
-    private OrderService orderService;
-
     @Autowired
     private OrderQueryService orderQueryService;
 
+    /* Mocks */
+    @InjectMocks
+    @Autowired
+    private OrderService orderService;
 
-    @Test
-    void testMySqlConn() {
-        assertThat(mysqldb.isCreated()).isTrue();
-        assertThat(mysqldb.isRunning()).isTrue();
+    @Mock
+    private AdressGeteWay adressGeteWay;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("MG", "Belo horizonte", "36300008"));
+        this.orderRepository.deleteAll();
     }
 
     @AfterAll
@@ -72,17 +84,19 @@ public class OrderServiceTest {
         mysqldb.close();
     }
 
-    @BeforeEach
-    void cleanOrdersTable() {
-        this.orderRepository.deleteAll();
+    @Test
+    void testMySqlConn() {
+        assertThat(mysqldb.isCreated()).isTrue();
+        assertThat(mysqldb.isRunning()).isTrue();
     }
 
     private static String client_id_db = "1fef5e47-5ab0-4391-b0a0-49592e977578";
 
-   // private String PAYMENT_API_AUTH_TOKEN = "can be a jwt!";
+    // private String PAYMENT_API_AUTH_TOKEN = "can be a jwt!";
 
     @Test
     void shouldPlaceAnOrderAndConsult() {
+
         // English project
 
         // Add Cupom to the order [x]
@@ -115,6 +129,7 @@ public class OrderServiceTest {
 
     @Test
     void shouldNotBeAbleToPlaceAnOrderWithInvalidProduct() {
+        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("Invalid_product_id", 12));
         var ex = assertThrows(NotFoundEx.class,
@@ -124,8 +139,9 @@ public class OrderServiceTest {
 
     @Test
     void shouldBeAbleToAddAnCouponToTheOrder() {
-                List<ItemInputs> itemsInput = new ArrayList<>();
+        List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 5));
+
         var id = assertDoesNotThrow(
                 () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", "SAVE10"));
 
@@ -133,7 +149,44 @@ public class OrderServiceTest {
         assertThat(order.getTotal()).isEqualTo(945);
         assertEquals("SAVE10", order.getCoupon());
 
-        var usedCoupon  = couponRepository.findById("SAVE10").get();
+        var usedCoupon = couponRepository.findById("SAVE10").get();
         assertEquals(1, usedCoupon.getUsed()); /* coupon used */
     }
+
+    @Test
+    @Tag("current")
+    void shouldCalculateTheOrderWithStateFessAndCouponDiscount() {
+        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
+        List<ItemInputs> itemsInput = new ArrayList<>();
+        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
+
+        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null);
+        var order = this.orderRepository.getOrder(order_id);
+        assertEquals(661, order.getTotal());
+        assertEquals(1, order.getOrderItems().size());
+        var orderItem = order.getOrderItems().get(0);
+        assertNotNull(orderItem.id());
+        assertEquals("284791a5-5a40-4a31-a60c-d2df68997569", orderItem.productId());
+        assertEquals("WAITING_PAYMENT", order.getStatus());
+        assertTrue(order.getClientEmail().equals("joao@exemplo.com.br"));
+
+    }
+
+    @Test
+    @Disabled
+    void shouldBeAbleToGetAnOrder() {
+        List<ItemInputs> itemsInput = new ArrayList<>();
+        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
+        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null);
+        var order = this.orderService.getOrder(order_id);
+
+        assertEquals(1, order.items().size());
+        var orderItem = order.items().get(0);
+        assertNotNull(orderItem.id());
+        assertEquals("284791a5-5a40-4a31-a60c-d2df68997569", orderItem.productId());
+        assertEquals("WAITING_PAYMENT", order.status());
+        assertEquals(661, order.total());
+        assertTrue(order.clientEmail().equals("joao@exemplo.com.br"));
+    }
+
 }

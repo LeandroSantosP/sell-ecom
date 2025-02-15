@@ -24,7 +24,10 @@ import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
 import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class OrderService {
 
 	private JdbcClient jdbcClient;
@@ -37,7 +40,7 @@ public class OrderService {
 	private AdressGeteWay adressGeteWay;
 
 	public OrderService(JdbcClient jdbcClient, OrderRepository orderRepository, ProductRepository productRepository,
-			ClientRepository clientRepository, @Qualifier("fakeHttpClientGeteway") AdressGeteWay adressGeteWay,
+			ClientRepository clientRepository, AdressGeteWay adressGeteWay,
 			CouponRepository couponRepository, MyClock clock) {
 		this.jdbcClient = jdbcClient;
 		this.orderRepository = orderRepository;
@@ -55,8 +58,6 @@ public class OrderService {
 			String couponCode) {
 		/* Create an repository? who knows */
 		ClientDbModel clientData = this.clientRepository.findByEmail(email).orElseThrow(() -> new NotFoundEx());
-		Address address = adressGeteWay.getAdress(addressCode);
-
 		Client client = new Client(UUID.fromString(clientData.id()), clientData.name(), clientData.email(),
 				clientData.city(), clientData.birthday(), clientData.create_at());
 
@@ -67,18 +68,23 @@ public class OrderService {
 					.orElseThrow(() -> new NotFoundEx("Product not found!"));
 			order.addItem(productData.price(), item.quantity(), productData.id());
 		}
-		
+
 		/* Coupon */
 		if (couponCode != (null)) {
 			MyCoupon coupon = this.couponRepository.getByCode(couponCode);
 			order.addCoupon(coupon);
 		}
 
+		Address address = adressGeteWay.getAdress(addressCode);
 		order.calcTotal(address); /* calc the total */
+		
 		this.orderRepository.persist(order);
+
 		for (MyCoupon myCoupon : order.getCoupons()) {
 			this.couponRepository.update(myCoupon);
 		}
+		/* handle erros with lombot error -> log.error("An error occurred while processing", ex); */
+		log.info("Order Create With Success!");
 		return order.getId();
 	}
 
@@ -86,9 +92,7 @@ public class OrderService {
 	}
 
 	public GetOrderOutput getOrder(String orderId) {
-
-		// var order = this.orderRepository.getOrder(orderId);
-
+		Order order = this.orderRepository.getOrder(orderId);
 		this.jdbcClient.sql("""
 				SELECT * FROM orders WHERE id = :id
 				""").param("id", orderId).query(OrderDbModel.class);

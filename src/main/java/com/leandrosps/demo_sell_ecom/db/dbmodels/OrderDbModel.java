@@ -13,7 +13,7 @@ import lombok.Getter;
 @Table("orders")
 public class OrderDbModel {
     @Id String id;
-    @Column("total") Long total;
+    @Column("total") long total;
     @Column("status") String status;
     @Column("client_id") String client_id;
     @Column("client_email") String client_email;

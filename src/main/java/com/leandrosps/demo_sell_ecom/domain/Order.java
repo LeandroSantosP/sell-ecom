@@ -12,9 +12,11 @@ import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @AllArgsConstructor
+@ToString
 public class Order {
    private String id;
    private String clientId;
@@ -22,16 +24,15 @@ public class Order {
    private Status status;
    private List<OrderItem> orderItems;
    private List<MyCoupon> coupons;
-   private Long total;
-   private LocalDate createAt;
-   private LocalDateTime orderDate;
+   private long total;
+   private LocalDateTime createAt;
    private MyClock clock;
 
    public static Order create(String clientId, String clientEmail, MyClock clock) {
       var inital_status = Status.WAITING_PAYMENT;
 
       return new Order(UUID.randomUUID().toString(), clientId, clientEmail, inital_status, new ArrayList<>(),
-            new ArrayList<>(), 0L, clock.getCurrentDate().toLocalDate(), clock.getCurrentDate(), clock);
+            new ArrayList<>(), 0L, clock.getCurrentDate(), clock);
    }
 
    public void addItem(long unityPrice, int quantity, String productId) {
@@ -46,7 +47,7 @@ public class Order {
    }
 
    public void addCoupon(MyCoupon coupon) {
-      if (!coupon.isValid(this.getCreateAt())) {
+      if (!coupon.isValid(this.getCreateAt().toLocalDate())) {
          throw new ExpiredCoupon();
       }
       this.coupons.add(coupon);

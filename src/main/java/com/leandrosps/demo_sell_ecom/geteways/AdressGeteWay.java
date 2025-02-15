@@ -7,6 +7,8 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import com.leandrosps.demo_sell_ecom.errors.InvalidAddress;
 
@@ -18,6 +20,7 @@ public interface AdressGeteWay {
     Address getAdress(String code);
 }
 
+@Primary
 @Component
 class FakeHttpClientGeteway implements AdressGeteWay {
 
