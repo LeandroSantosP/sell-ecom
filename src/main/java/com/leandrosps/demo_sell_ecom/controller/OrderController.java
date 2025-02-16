@@ -33,10 +33,20 @@ public class OrderController {
 
     @PostMapping("/place-order")
     public ResponseEntity<?> placeOrder(@Valid @RequestBody InputOrderController input) {
-        String product_id = this.orderService.placeOrder(input.email(), input.items(), input.getewaytoken(),
+        String product_id = this.orderService.placeOrder(input.email(), input.items(),
                 input.addressCode(), input.coupon());
         return ResponseEntity.ok(product_id);
     }
+
+    public record MakePaymenBody(@NotNull String payment_token) {
+    }
+
+    @PostMapping("/make-payment/{order_id}")
+    public ResponseEntity<?> makePayment(@NotNull @PathVariable String order_id, @RequestBody MakePaymenBody body) {
+        this.orderService.makePayment(order_id, body.payment_token());;
+        return ResponseEntity.status(201).build();
+    }
+    
 
     @GetMapping("/{client_id}/{status}")
     public ResponseEntity<?> getMethodName(@PathVariable String client_id, @PathVariable String status) {

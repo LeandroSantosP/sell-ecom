@@ -42,8 +42,8 @@ public class OrderService {
 	private AdressGeteWay adressGeteWay;
 
 	public OrderService(JdbcClient jdbcClient, OrderRepository orderRepository, ProductRepository productRepository,
-			ClientRepository clientRepository, AdressGeteWay adressGeteWay,
-			CouponRepository couponRepository, PaymentGeteWay paymentGeteWay, MyClock clock) {
+			ClientRepository clientRepository, AdressGeteWay adressGeteWay, CouponRepository couponRepository,
+			PaymentGeteWay paymentGeteWay, MyClock clock) {
 		this.jdbcClient = jdbcClient;
 		this.orderRepository = orderRepository;
 		this.productRepository = productRepository;
@@ -57,9 +57,8 @@ public class OrderService {
 	public record ItemInputs(String procuct_id, Integer quantity) {
 	}
 
-	public String placeOrder(String email, List<ItemInputs> orderItems, String gatewayToken, String addressCode,
+	public String placeOrder(String email, List<ItemInputs> orderItems, String addressCode,
 			String couponCode) {
-		/* Create an repository? who knows */
 		ClientDbModel clientData = this.clientRepository.findByEmail(email).orElseThrow(() -> new NotFoundEx());
 		Client client = new Client(UUID.fromString(clientData.id()), clientData.name(), clientData.email(),
 				clientData.city(), clientData.birthday(), clientData.create_at());
@@ -72,28 +71,36 @@ public class OrderService {
 			order.addItem(productData.price(), item.quantity(), productData.id());
 		}
 
-		/* Coupon */
 		if (couponCode != (null)) {
 			MyCoupon coupon = this.couponRepository.getByCode(couponCode);
 			order.addCoupon(coupon);
 		}
 
-	 	var response = this.paymentGeteWay.execut(gatewayToken);
-	 	if (response.status_code() != 200 || !response.content().equals(gatewayToken)) {
-			/* Failed on payment - Undo everything ?? */
-			System.out.println("HERE:");
-		}	
-	 	Address address = adressGeteWay.getAdress(addressCode);
+		Address address = adressGeteWay.getAdress(addressCode);
 		order.calcTotal(address); /* calc the total */
-		
 		this.orderRepository.persist(order);
 
-		for (MyCoupon myCoupon : order.getCoupons()) {
-			this.couponRepository.update(myCoupon);
-		}
-		/* handle erros with lombot error -> log.error("An error occurred while processing", ex); */
 		log.info("Order Create With Success!");
 		return order.getId();
+	}
+
+	public void makePayment(String order_id, String gatewayToken) {
+		var order = this.orderRepository.getOrder(order_id);
+
+		var response = this.paymentGeteWay.execut(gatewayToken);
+
+		if (response.status_code() == 400 || response.status().equals("recussed")) {
+			/* Failed on payment - Undo everything ?? */
+			order.updated_status("RECUSSED");
+			this.orderRepository.updated_order_status(order);
+			return;
+		} else if (response.status_code() == 200 && response.status().equals("accept")) {
+			order.updated_status("PAYED");
+			for (MyCoupon myCoupon : order.getCoupons()) {
+				this.couponRepository.update(myCoupon);
+			}
+			this.orderRepository.updated_order_status(order);
+		}
 	}
 
 	public record GetOrderOutput(String clientEmail, String status, long total, List<OrderItem> items) {

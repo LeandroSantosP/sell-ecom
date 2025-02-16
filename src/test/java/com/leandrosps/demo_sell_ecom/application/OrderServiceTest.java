@@ -36,8 +36,10 @@ import com.leandrosps.demo_sell_ecom.application.OrderService.ItemInputs;
 import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.domain.Address;
+import com.leandrosps.demo_sell_ecom.dtos.ResonseBody;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
+import com.leandrosps.demo_sell_ecom.geteways.PaymentGeteWay;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 
 @SpringBootTest
@@ -61,6 +63,7 @@ public class OrderServiceTest {
 
     @Autowired
     private CouponRepository couponRepository;
+
     @Autowired
     private OrderQueryService orderQueryService;
 
@@ -71,6 +74,9 @@ public class OrderServiceTest {
 
     @Mock
     private AdressGeteWay adressGeteWay;
+
+    @Mock
+    private PaymentGeteWay paymentGeteWay;
 
     @BeforeEach
     void setUp() {
@@ -96,17 +102,9 @@ public class OrderServiceTest {
 
     @Test
     void shouldPlaceAnOrderAndConsult() {
-
-        // English project
-
-        // Add Cupom to the order [x]
-        // Add Payment Paypal fake Gateway moke apit: []
-        // https://util.devi.tools/api/v2/authorize
-
-        // client registed in the database
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
-        var createOrderOutput = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null);
+        var createOrderOutput = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null);
         assertInstanceOf(UUID.class, UUID.fromString(createOrderOutput));
         assertThat(createOrderOutput).isNotEmpty();
 
@@ -133,7 +131,7 @@ public class OrderServiceTest {
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("Invalid_product_id", 12));
         var ex = assertThrows(NotFoundEx.class,
-                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null));
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
         assertEquals("Product not found!", ex.getMessage());
     }
 
@@ -143,7 +141,7 @@ public class OrderServiceTest {
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 5));
 
         var id = assertDoesNotThrow(
-                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", "SAVE10"));
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", "SAVE10"));
 
         var order = this.orderQueryService.getOrderById(id);
         assertThat(order.getTotal()).isEqualTo(945);
@@ -157,7 +155,7 @@ public class OrderServiceTest {
     void shouldBeAbleToGetAnOrder() {
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
-        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "", "36300008", null);
+        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null);
         var order = this.orderRepository.getOrder(order_id);
 
         assertEquals(1, order.getOrderItems().size());
@@ -176,7 +174,7 @@ public class OrderServiceTest {
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
 
-        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "62887c55-38b2-4099-9e0c-1674756ea315", "36300008", null);
+        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null);
         var order = this.orderRepository.getOrder(order_id);
         assertEquals(661, order.getTotal());
         assertEquals(1, order.getOrderItems().size());
@@ -189,6 +187,38 @@ public class OrderServiceTest {
 
     @Test
     void shouldProcessAnPaymentAndChangeTheStatusToPayed() {
-        
+        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
+        Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
+                .thenReturn(new ResonseBody(200, "accept", "62887c55-38b2-4099-9e0c-1674756ea315"));
+
+        List<ItemInputs> itemsInput = new ArrayList<>();
+        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
+
+        var order_id = assertDoesNotThrow(
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
+
+        this.orderService.makePayment(order_id, "62887c55-38b2-4099-9e0c-1674756ea315");
+        var order = this.orderRepository.getOrder(order_id);
+
+        assertEquals("PAYED", order.getStatus());
+    }
+
+    @Test
+    void shouldProcessAnRefusedPaymentAndChangeTheStatusToRecussed() {
+        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
+        Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
+                .thenReturn(new ResonseBody(400, "recussed", "62887c55-38b2-4099-9e0c-1674756ea315"));
+
+        List<ItemInputs> itemsInput = new ArrayList<>();
+        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
+
+        var order_id = assertDoesNotThrow(
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
+
+        this.orderService.makePayment(order_id, "62887c55-38b2-4099-9e0c-1674756ea315");
+
+        var order = this.orderRepository.getOrder(order_id);
+
+        assertEquals("RECUSSED", order.getStatus());
     }
 }

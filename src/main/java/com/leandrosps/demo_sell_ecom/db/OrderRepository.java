@@ -26,6 +26,8 @@ interface OrderRepositoryCustom {
 	Order getOrder(String order_id);
 
 	void update(Order order);
+
+	void updated_order_status(Order coupon);
 }
 
 class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
@@ -75,7 +77,7 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 	@Override
 	@Transactional
 	public Order getOrder(String order_id) {
-		
+
 		/* Create An Restore method for Order latter */
 		if (order_id == null || order_id.isEmpty()) {
 			throw new IllegalArgumentException("Order ID cannot be null or empty");
@@ -117,6 +119,8 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 		Status status = null;
 		if (orderData.getStatus().equals("WAITING_PAYMENT")) {
 			status = Status.WAITING_PAYMENT;
+		} else if (orderData.getStatus().equals("RECUSSED")) {
+			status = Status.RECUSSED;
 		} else if (orderData.getStatus().equals("PAYED")) {
 			status = Status.PAYED;
 		}
@@ -126,6 +130,17 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
 	@Override
 	public void update(Order order) {
+		/* i should do this one but im not bc im lazy */
 		throw new UnsupportedOperationException("Unimplemented method 'update'");
+	}
+
+	@Override
+	public void updated_order_status(Order order) {
+		this.jdbcClient.sql("""
+				UPDATE
+					orders SET status = :status
+				WHERE
+					id = :order_id
+				""").param("order_id", order.getId()).param("status", order.getStatus()).update();
 	}
 }

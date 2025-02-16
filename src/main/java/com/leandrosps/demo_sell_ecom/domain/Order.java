@@ -76,12 +76,18 @@ public class Order {
    }
 
    public void updated_status(String status) {
+      List.of("PAYED", "RECUSSED","CANCEL").contains(status);
+
       if (status.equals("PAYED")) {
          this.status = Status.PAYED;
-      } else if (status.equals("cancel")) {
+         return;
+      } else if (status.equals("RECUSSED")) {
+         this.status = Status.RECUSSED;
+         return;
+      } else if (status.equals("CANCEL")) {
          this.status = Status.CANCEL;
          return;
-      } 
+      }
       throw new RuntimeException("Invalid Status");
    }
 
