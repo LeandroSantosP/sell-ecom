@@ -34,19 +34,20 @@ class MyHttpClinet implements PaymentGeteWay {
 					.ofString(new JSONObject().put("token", token).toString());
 
 			HttpRequest request = HttpRequest.newBuilder().uri(new URI(base_url + "/process_payment"))
-					.header("Content-Type", "application/json").POST(bodyPublisher).version(HttpClient.Version.HTTP_2).build();
+					.header("Content-Type", "application/json").POST(bodyPublisher).version(HttpClient.Version.HTTP_2)
+					.build();
 
 			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
 			if (response.statusCode() == 400) {
 				log.error("Request failed with status code: " + response.statusCode());
 			}
-			
+
 			JSONObject body = new JSONObject(response.body());
-			return new ResonseBody(body.getInt("status_code"), body.getString("token"));
+			return new ResonseBody(body.getInt("status_code"), body.getString("status"), body.getString("content"));
 		} catch (Exception e) {
 			log.error("ERROR: ", e);
-			throw new GetewayServerError(e.getMessage());
+			throw new GetewayServerError(e.getMessage(), "PaymentGeteWay");
 		}
 	}
 }

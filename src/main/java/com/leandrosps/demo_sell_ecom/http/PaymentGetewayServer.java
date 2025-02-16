@@ -25,7 +25,7 @@ class ProcessePaymentBody {
 @Component
 public class PaymentGetewayServer {
 
-	static record ReponseBodyPaymentProcess(int status_code, String token) {
+	static record ReponseBodyPaymentProcess(int status_code, String status, String content) {
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -57,10 +57,20 @@ public class PaymentGetewayServer {
 			case "POST":
 				try (OutputStream os = exchange.getResponseBody()) {
 					log.info("OK3" + requestBody);
+					System.out.println("HERE: "+body.token.isEmpty());
+					if (body.token == null || body.token.isEmpty()) {
+						var response = mapper
+								.writeValueAsBytes(new ReponseBodyPaymentProcess(400, "recussed", "invalid_token"));
+						exchange.sendResponseHeaders(400, response.length);
+						os.write(response);
+						os.close();
+						return;
+					}
 
 					String path = exchange.getRequestURI().getPath();
 					if (path.equals("/process_payment")) {
-						var response = mapper.writeValueAsBytes(new ReponseBodyPaymentProcess(200, body.token));
+						var response = mapper
+								.writeValueAsBytes(new ReponseBodyPaymentProcess(200, "accept", body.token));
 						exchange.sendResponseHeaders(200, response.length);
 						os.write(response);
 						os.close();

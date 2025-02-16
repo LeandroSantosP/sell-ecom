@@ -77,9 +77,11 @@ public class OrderService {
 			MyCoupon coupon = this.couponRepository.getByCode(couponCode);
 			order.addCoupon(coupon);
 		}
+
 	 	var response = this.paymentGeteWay.execut(gatewayToken);
-	 	if (response.status_code() != 200 || !response.body().equals(gatewayToken)) {
+	 	if (response.status_code() != 200 || !response.content().equals(gatewayToken)) {
 			/* Failed on payment - Undo everything ?? */
+			System.out.println("HERE:");
 		}	
 	 	Address address = adressGeteWay.getAdress(addressCode);
 		order.calcTotal(address); /* calc the total */
