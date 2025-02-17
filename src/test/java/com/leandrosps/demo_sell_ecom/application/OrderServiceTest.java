@@ -168,7 +168,6 @@ public class OrderServiceTest {
     }
 
     @Test
-    @Tag("current")
     void shouldCalculateTheOrderWithStateFessAndCouponDiscount() {
         Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
         List<ItemInputs> itemsInput = new ArrayList<>();
