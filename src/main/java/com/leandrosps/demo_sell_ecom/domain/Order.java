@@ -54,6 +54,11 @@ public class Order {
    }
 
    public Long calcTotal(Address address) {
+
+      if (this.getStatus().equals("CANCEL")) {
+         throw new RuntimeException("This order has been cancel!");
+      }
+
       Long total = 0L;
 
       for (var item : this.orderItems) {
@@ -76,10 +81,13 @@ public class Order {
    }
 
    public void updated_status(String status) {
-      List.of("PAYED", "RECUSSED","CANCEL").contains(status);
+      var VALID_STATUS = List.of("PAID", "RECUSSED", "CANCEL");
+      if (!VALID_STATUS.contains(status)) {
+         throw new RuntimeException("Invalid Status!");
+      }
 
-      if (status.equals("PAYED")) {
-         this.status = Status.PAYED;
+      if (status.equals("PAID")) {
+         this.status = Status.PAID;
          return;
       } else if (status.equals("RECUSSED")) {
          this.status = Status.RECUSSED;
@@ -88,7 +96,17 @@ public class Order {
          this.status = Status.CANCEL;
          return;
       }
-      throw new RuntimeException("Invalid Status");
+   }
+
+   public void cancel () {
+      if (this.getStatus().equals("PAID")) {
+         throw new RuntimeException("This order has already been paid!");
+      }
+
+      if (this.getStatus().equals("WAITING_PAYMENT")) {
+         this.updated_status("CANCEL");
+      }
+
    }
 
 }

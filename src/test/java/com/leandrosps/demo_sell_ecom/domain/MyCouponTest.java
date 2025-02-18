@@ -30,7 +30,8 @@ public class MyCouponTest {
         var coupon = MyCoupon.craete("SAVE10", 10, true, 2, LocalDate.of(2024, 03, 21));
         coupon.calcDiscountIn(100);
         coupon.calcDiscountIn(100);
-        assertThrows("This coupon active its usage limite: SAVE10", CouponUsageLimitEx.class, () -> coupon.calcDiscountIn(100));
+        assertThrows("This coupon active its usage limite: SAVE10", CouponUsageLimitEx.class,
+                () -> coupon.calcDiscountIn(100));
     }
 
     @Test
@@ -50,6 +51,26 @@ public class MyCouponTest {
         var NotExpiredDate = LocalDate.of(2024, 02, 21);
         assertTrue(coupon.isValid(NotExpiredDate));
         assertFalse(coupon.isValid(expiredDate));
+    }
+
+    @Test
+    void shouldDecreaseTheUsageOfACoupon() {
+        var coupon = MyCoupon.craete("SAVE10", 10, true, 2, LocalDate.of(2024, 03, 21));
+        coupon.calcDiscountIn(100);
+        assertEquals(1, coupon.getUsed());
+        coupon.decreseUsage(); /* back to 0 usages */
+        assertEquals(0, coupon.getUsed());
+    }
+
+    @Test
+    void shouldNotBeAbleToDecreaseOrIncreaseAnInvalidUsage() {
+        var coupon = MyCoupon.craete("SAVE10", 10, true, 2, LocalDate.of(2024, 03, 21));
+        assertThrows("This coupon active its usage limite: SAVE10", CouponUsageLimitEx.class,
+                () -> coupon.decreseUsage()); /* back to 0 usages */
+        coupon.calcDiscountIn(100);
+        coupon.calcDiscountIn(100);
+        assertThrows("This coupon active its usage limite: SAVE10", CouponUsageLimitEx.class,
+                () -> coupon.calcDiscountIn(100)); /* back to 0 usages */
     }
 
 }

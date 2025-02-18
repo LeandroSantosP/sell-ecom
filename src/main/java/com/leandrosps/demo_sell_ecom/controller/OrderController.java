@@ -2,11 +2,9 @@ package com.leandrosps.demo_sell_ecom.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.leandrosps.demo_sell_ecom.application.OrderService;
 import com.leandrosps.demo_sell_ecom.application.OrderService.ItemInputs;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -27,14 +25,20 @@ public class OrderController {
         this.orderQueryService = orderQueryService;
     }
 
+    public record ListItem(String procuct_id, int quantity) {
+    }
+
+    public record ReguesBody(String email, String addressCode, String getewaytoken, List<ListItem> items) {
+    }
+
     public record InputOrderController(@NotNull String email, @NotNull List<ItemInputs> items,
             @NotNull String getewaytoken, @NotNull String addressCode, String coupon) {
     }
 
     @PostMapping("/place-order")
     public ResponseEntity<?> placeOrder(@Valid @RequestBody InputOrderController input) {
-        String product_id = this.orderService.placeOrder(input.email(), input.items(),
-                input.addressCode(), input.coupon());
+        String product_id = this.orderService.placeOrder(input.email(), input.items(), input.addressCode(),
+                input.coupon());
         return ResponseEntity.ok(product_id);
     }
 
@@ -42,11 +46,17 @@ public class OrderController {
     }
 
     @PostMapping("/make-payment/{order_id}")
-    public ResponseEntity<?> makePayment(@NotNull @PathVariable String order_id, @RequestBody MakePaymenBody body) {
-        this.orderService.makePayment(order_id, body.payment_token());;
+    public ResponseEntity<ReguesBody> makePayment(@NotNull @PathVariable String order_id,
+            @RequestBody MakePaymenBody body) {
+        this.orderService.makePayment(order_id, body.payment_token());
         return ResponseEntity.status(201).build();
     }
-    
+
+    @PostMapping("/cancel-order/{order_id}")
+    public ResponseEntity<?> cancelOrder(@NotNull @PathVariable String order_id) {
+        this.orderService.cancelOrder(order_id);
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/{client_id}/{status}")
     public ResponseEntity<?> getMethodName(@PathVariable String client_id, @PathVariable String status) {

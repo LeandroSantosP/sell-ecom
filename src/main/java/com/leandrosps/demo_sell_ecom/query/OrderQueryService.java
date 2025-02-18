@@ -50,6 +50,7 @@ public class OrderQueryService {
         var orderData = orderRepository.findById(order_id).orElseThrow(() -> new NotFoundEx("Order Not exists!"));
         var orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
                 .param("order_id", orderData.getId()).query(OrderItemDbModel.class).list();
+                
         return new GetOrderByIdOuput(orderData.getId(), orderData.getTotal(), orderData.getStatus(),
                 orderData.getClient_id(), orderData.getClient_email(), orderData.getCoupon(), orderData.getCreated_at(),
                 orderItems);

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class GetewayServerError extends RuntimeException {
 	private ERROTYPE type = ERROTYPE.DEFAULT;
 
-	public GetewayServerError(String mss, String geteway) {
+	public GetewayServerError(String geteway, String mss) {
 		super("Error on Geteway Server: " + geteway + " " + mss);
 	}
 

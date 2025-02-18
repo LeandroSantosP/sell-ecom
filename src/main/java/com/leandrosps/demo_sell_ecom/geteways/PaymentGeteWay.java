@@ -46,8 +46,7 @@ class MyHttpClinet implements PaymentGeteWay {
 			JSONObject body = new JSONObject(response.body());
 			return new ResonseBody(body.getInt("status_code"), body.getString("status"), body.getString("content"));
 		} catch (Exception e) {
-			log.error("ERROR: ", e);
-			throw new GetewayServerError(e.getMessage(), "PaymentGeteWay");
+			throw new GetewayServerError("PaymentGeteWay", e.getMessage());
 		}
 	}
 }

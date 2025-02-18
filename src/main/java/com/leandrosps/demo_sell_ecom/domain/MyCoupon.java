@@ -28,6 +28,19 @@ public class MyCoupon {
         return (value * this.percentage) / 100;
     }
 
+    public void decreseUsage() {
+        
+        if (this.used - 1 < 0) {
+            throw new CouponUsageLimitEx(this.code);
+        }
+
+        if (this.used - 1 != this.quantity) {
+            this.isAvailable = true;
+        }
+
+        this.used--;
+    }
+
     private void increaseUsage() {
         if (this.used + 1 > this.quantity) {
             throw new CouponUsageLimitEx(this.code);

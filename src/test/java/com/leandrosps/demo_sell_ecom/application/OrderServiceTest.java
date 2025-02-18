@@ -9,14 +9,15 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,7 +27,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -36,6 +36,7 @@ import com.leandrosps.demo_sell_ecom.application.OrderService.ItemInputs;
 import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.domain.Address;
+import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
 import com.leandrosps.demo_sell_ecom.dtos.ResonseBody;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
@@ -83,6 +84,7 @@ public class OrderServiceTest {
         MockitoAnnotations.openMocks(this);
         Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("MG", "Belo horizonte", "36300008"));
         this.orderRepository.deleteAll();
+        this.couponRepository.deleteAll();
     }
 
     @AfterAll
@@ -97,8 +99,6 @@ public class OrderServiceTest {
     }
 
     private static String client_id_db = "1fef5e47-5ab0-4391-b0a0-49592e977578";
-
-    // private String PAYMENT_API_AUTH_TOKEN = "can be a jwt!";
 
     @Test
     void shouldPlaceAnOrderAndConsult() {
@@ -120,51 +120,9 @@ public class OrderServiceTest {
             assertThat(result.orderCreatedAt()).isInstanceOf(LocalDateTime.class);
             assertThat(result.orderId()).isEqualTo(createOrderOutput);
             assertThat(result.orderStatus()).isEqualTo("WAITING_PAYMENT");
-            assertThat(result.orderStatus()).isNotEqualTo("CONFIRMED");
+            assertThat(result.orderStatus()).isNotEqualTo("PAID");
             assertThat(result.orderItems().size()).isEqualTo(1);
         });
-    }
-
-    @Test
-    void shouldNotBeAbleToPlaceAnOrderWithInvalidProduct() {
-        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
-        List<ItemInputs> itemsInput = new ArrayList<>();
-        itemsInput.add(new ItemInputs("Invalid_product_id", 12));
-        var ex = assertThrows(NotFoundEx.class,
-                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
-        assertEquals("Product not found!", ex.getMessage());
-    }
-
-    @Test
-    void shouldBeAbleToAddAnCouponToTheOrder() {
-        List<ItemInputs> itemsInput = new ArrayList<>();
-        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 5));
-
-        var id = assertDoesNotThrow(
-                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", "SAVE10"));
-
-        var order = this.orderQueryService.getOrderById(id);
-        assertThat(order.getTotal()).isEqualTo(945);
-        assertEquals("SAVE10", order.getCoupon());
-
-        var usedCoupon = couponRepository.findById("SAVE10").get();
-        assertEquals(1, usedCoupon.getUsed()); /* coupon used */
-    }
-
-    @Test
-    void shouldBeAbleToGetAnOrder() {
-        List<ItemInputs> itemsInput = new ArrayList<>();
-        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
-        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null);
-        var order = this.orderRepository.getOrder(order_id);
-
-        assertEquals(1, order.getOrderItems().size());
-        var orderItem = order.getOrderItems().get(0);
-        assertNotNull(orderItem.id());
-        assertEquals("284791a5-5a40-4a31-a60c-d2df68997569", orderItem.productId());
-        assertEquals("WAITING_PAYMENT", order.getStatus());
-        assertEquals(630, order.getTotal());
-        assertTrue(order.getClientEmail().equals("joao@exemplo.com.br"));
     }
 
     @Test
@@ -185,7 +143,62 @@ public class OrderServiceTest {
     }
 
     @Test
-    void shouldProcessAnPaymentAndChangeTheStatusToPayed() {
+    void shouldNotBeAbleToPlaceAnOrderWithInvalidProduct() {
+        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
+        List<ItemInputs> itemsInput = new ArrayList<>();
+        itemsInput.add(new ItemInputs("Invalid_product_id", 12));
+        var ex = assertThrows(NotFoundEx.class,
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
+        assertEquals("Product not found!", ex.getMessage());
+    }
+
+    @Test
+    @Tag("current")
+    void shouldBeAbleToAddAnCouponToTheOrder() {
+        this.couponRepository.persiste(MyCoupon.craete("SAVE10", 10, true, 2, LocalDate.of(2025, 3, 14)));
+        
+        Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
+                .thenReturn(new ResonseBody(200, "accept", "62887c55-38b2-4099-9e0c-1674756ea315"));
+
+        List<ItemInputs> itemsInput = new ArrayList<>(
+                List.of(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 5)));
+
+        var id = assertDoesNotThrow(
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", "SAVE10"));
+
+        this.orderService.makePayment(id, "62887c55-38b2-4099-9e0c-1674756ea315");
+        var usedCouponAfter = couponRepository.findById("SAVE10").get();
+
+        var order = this.orderQueryService.getOrderById(id);
+
+        assertEquals(1, usedCouponAfter.getUsed());
+        assertThat(order.getTotal()).isEqualTo(945);
+        assertEquals("SAVE10", order.getCoupon());
+    }
+
+    @Test
+    void shouldBeAbleToGetAnOrder() {
+        Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
+                .thenReturn(new ResonseBody(200, "accept", "62887c55-38b2-4099-9e0c-1674756ea315"));
+        List<ItemInputs> itemsInput = new ArrayList<>();
+        itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
+        var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null);
+        var order = this.orderRepository.getOrder(order_id);
+
+        this.orderService.makePayment(order.getId(), "62887c55-38b2-4099-9e0c-1674756ea315");
+
+        assertEquals(1, order.getOrderItems().size());
+        var orderItem = order.getOrderItems().get(0);
+
+        assertNotNull(orderItem.id());
+        assertEquals("284791a5-5a40-4a31-a60c-d2df68997569", orderItem.productId());
+        assertEquals("WAITING_PAYMENT", order.getStatus());
+        assertEquals(630, order.getTotal());
+        assertTrue(order.getClientEmail().equals("joao@exemplo.com.br"));
+    }
+
+    @Test
+    void shouldProcessAnPaymentAndChangeTheStatusToPaid() {
         Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
         Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
                 .thenReturn(new ResonseBody(200, "accept", "62887c55-38b2-4099-9e0c-1674756ea315"));
@@ -195,16 +208,15 @@ public class OrderServiceTest {
 
         var order_id = assertDoesNotThrow(
                 () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
-
         this.orderService.makePayment(order_id, "62887c55-38b2-4099-9e0c-1674756ea315");
         var order = this.orderRepository.getOrder(order_id);
-
-        assertEquals("PAYED", order.getStatus());
+        assertEquals("PAID", order.getStatus());
     }
 
     @Test
+    @Tag("current")
     void shouldProcessAnRefusedPaymentAndChangeTheStatusToRecussed() {
-        Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("SP", "Itaquera", null));
+        this.couponRepository.persiste(MyCoupon.craete("SAVE10", 10, true, 2, LocalDate.of(2025, 3, 14)));
         Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
                 .thenReturn(new ResonseBody(400, "recussed", "62887c55-38b2-4099-9e0c-1674756ea315"));
 
@@ -212,12 +224,17 @@ public class OrderServiceTest {
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
 
         var order_id = assertDoesNotThrow(
-                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", "SAVE10"));
+
+        var usedCouponBefore = couponRepository.findById("SAVE10").get();
+        assertEquals(1, usedCouponBefore.getUsed());
 
         this.orderService.makePayment(order_id, "62887c55-38b2-4099-9e0c-1674756ea315");
 
         var order = this.orderRepository.getOrder(order_id);
+        var usedCouponAfter = couponRepository.findById("SAVE10").get();
 
+        assertEquals(0, usedCouponAfter.getUsed()); /* Coupon Usage Returns To 0 After a Refussed payments */
         assertEquals("RECUSSED", order.getStatus());
     }
 }

@@ -1,5 +1,6 @@
 package com.leandrosps.demo_sell_ecom.domain;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
@@ -68,6 +69,22 @@ public class OrderTest {
       var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", clock);
       order.addItems(orderItems.toArray(new OrderItem[0]));
       assertEquals(252, order.calcTotal(adress), "The total of the order is incorrect!");
+   }
+
+   @Test
+   void shouldBeAbleToChangeTheStausOrder() {
+      var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", clock);
+      assertEquals("WAITING_PAYMENT", order.getStatus());
+
+      order.updated_status("PAID");
+      assertEquals("PAID", order.getStatus());
+
+      order.updated_status("RECUSSED");
+      assertEquals("RECUSSED", order.getStatus());
+
+      assertThrows("Invalid Status!", RuntimeException.class, () -> order.updated_status("INVALID_STATUS"));
+      assertEquals("RECUSSED", order.getStatus());
+
    }
 
    @ParameterizedTest

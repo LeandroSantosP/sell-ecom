@@ -54,7 +54,7 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 				VALUES
 				    (:id, :total, :status, :client_id, :client_email, :coupon, :created_at)
 				    """;
-
+					
 		this.jdbcClient.sql(sqlCreateOrder).param("id", order.getId())
 				/* fix this address later */
 				.param("total", order.getTotal()).param("status", order.getStatus())
@@ -121,8 +121,8 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 			status = Status.WAITING_PAYMENT;
 		} else if (orderData.getStatus().equals("RECUSSED")) {
 			status = Status.RECUSSED;
-		} else if (orderData.getStatus().equals("PAYED")) {
-			status = Status.PAYED;
+		} else if (orderData.getStatus().equals("PAID")) {
+			status = Status.PAID;
 		}
 		return new Order(orderData.getId(), orderData.getClient_id(), orderData.getClient_email(), status, orderItems,
 				coupons, orderData.getTotal(), orderData.getCreated_at(), clock);
