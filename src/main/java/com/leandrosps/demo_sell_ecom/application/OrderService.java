@@ -53,8 +53,8 @@ public class OrderService {
 	}
 
 	public String placeOrder(String email, List<ItemInputs> orderItems, String addressCode, String couponCode) {
-		ClientDbModel clientData = this.clientRepository.findByEmail(email).orElseThrow(() -> new NotFoundEx());
-		Client client = new Client(UUID.fromString(clientData.id()), clientData.name(), clientData.email(),
+		ClientDbModel clientData = this.clientRepository.findByFkEmail(email).orElseThrow(() -> new NotFoundEx());
+		Client client = new Client(UUID.fromString(clientData.id()), clientData.name(), clientData.fkEmail(),
 				clientData.city(), clientData.birthday(), clientData.create_at());
 
 		var order = Order.create(client.getId().toString(), client.getEmail(), this.clock);

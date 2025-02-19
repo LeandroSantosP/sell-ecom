@@ -65,7 +65,7 @@ public class OrderQueryService {
                     o.id AS orderId,
                     c.id AS clientId,
                     c.name AS clientName,
-                    c.email AS clientEmail,
+                    c.fk_email AS clientEmail,
                     o.total as orderTotal,
                     o.status as orderStatus,
                     o.coupon as orderCoupon,

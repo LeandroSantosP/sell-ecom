@@ -1,12 +1,21 @@
+INSERT INTO roles (name) VALUES ('user');
+
+
+
 INSERT INTO
-   clients (id, name, email, city, birthday)
+   users (username, password, email, roles)
+VALUES
+('johnUser', "$2y$07$FON2hxYEWLW9W5CmCdyba.gjF.AL3C5kgHK1Ov8sko3DJ8SSsWNJu", "joao@exemplo.com.br", '["user"]');
+
+INSERT INTO
+   clients (id, name, fk_email, city, birthday)
 VALUES
    (
       '1fef5e47-5ab0-4391-b0a0-49592e977578',
       'João Pereira',
       'joao@exemplo.com.br',
       'Rio de Janeiro',
-      '1999-02-06'
+      '1999-02-06' 
    );
 
 INSERT INTO
@@ -28,11 +37,10 @@ VALUES
       '2025-02-07T13:38:06.399843833'
    );
 
-
-INSERT INTO 
+INSERT INTO
    brands (id, name)
 VALUES
-('291e753d-1861-4dd5-b1dd-acdab2945e66', 'Apple');
+   ('291e753d-1861-4dd5-b1dd-acdab2945e66', 'Apple');
 
 INSERT INTO
    products (id, name, price, stoke, brand_id, image_ref)
@@ -46,9 +54,13 @@ VALUES
       'http://img.com/2324'
    );
 
-
-INSERT INTO coupons
-   (code, percentage, usage_limit, is_available, expired_at)
+INSERT INTO
+   coupons (
+      code,
+      percentage,
+      usage_limit,
+      is_available,
+      expired_at
+   )
 VALUES
    ('SAVE10', 10, 2, 1, '2025-02-14');
-
