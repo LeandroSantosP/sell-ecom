@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
-
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.db.dbmodels.ClientDbModel;
 import com.leandrosps.demo_sell_ecom.db.dbmodels.OrderDbModel;
@@ -50,7 +49,7 @@ public class OrderQueryService {
         var orderData = orderRepository.findById(order_id).orElseThrow(() -> new NotFoundEx("Order Not exists!"));
         var orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
                 .param("order_id", orderData.getId()).query(OrderItemDbModel.class).list();
-                
+
         return new GetOrderByIdOuput(orderData.getId(), orderData.getTotal(), orderData.getStatus(),
                 orderData.getClient_id(), orderData.getClient_email(), orderData.getCoupon(), orderData.getCreated_at(),
                 orderItems);
@@ -84,10 +83,10 @@ public class OrderQueryService {
         orders.forEach(order -> {
             List<OrderItemDbModel> orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
                     .param("order_id", order.orderId()).query(OrderItemDbModel.class).list();
-            
+
             result.add(new GetOrdersOfAClientOutPut(order.orderId(), order.clientId(), order.clientName(),
-                    order.clientEmail(), order.orderTotal(), order.orderStatus(), order.orderCoupon(), order.orderCreatedAt(),
-                    orderItems));
+                    order.clientEmail(), order.orderTotal(), order.orderStatus(), order.orderCoupon(),
+                    order.orderCreatedAt(), orderItems));
         });
 
         return result;

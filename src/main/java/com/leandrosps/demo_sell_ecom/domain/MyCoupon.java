@@ -3,12 +3,10 @@ package com.leandrosps.demo_sell_ecom.domain;
 import java.time.LocalDate;
 
 import com.leandrosps.demo_sell_ecom.errors.CouponUsageLimitEx;
-
-import lombok.AllArgsConstructor;
+import com.leandrosps.demo_sell_ecom.errors.InvalidCouponExpireDate;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class MyCoupon {
     private String code;
     private int percentage;
@@ -18,9 +16,44 @@ public class MyCoupon {
     private LocalDate expiredAt;
     private LocalDate createdAt;
 
-    static public MyCoupon craete(String code, int percentage, boolean isAvailable, int quantity,
-            LocalDate expiredAt) {
-        return new MyCoupon(code, percentage, isAvailable, quantity, 0, expiredAt, LocalDate.now());
+    public MyCoupon(String code, int percentage, boolean isAvailable, int quantity, int used, LocalDate expiredAt,
+            LocalDate createdAt) {
+
+        if (code == null || code.isBlank()) {
+            this.code = couponCodeValidation("SAVE".concat(Integer.toString(percentage)));
+        } else {
+            this.code = couponCodeValidation(code);
+        }
+
+
+        if (expiredAt.isBefore(createdAt)) {
+            throw new InvalidCouponExpireDate();
+        }
+
+        this.percentage = percentage;
+        this.isAvailable = isAvailable;
+        this.quantity = quantity;
+        this.used = used;
+        this.expiredAt = expiredAt;
+        this.createdAt = createdAt;
+    }
+
+    private String couponCodeValidation(String code) {
+        var codeSlited = String.copyValueOf(code.toCharArray()).split("SAVE");
+        if (!code.startsWith("SAVE") || codeSlited.length != 2 || !codeSlited[0].equals("")
+                || !codeSlited[1].matches("\\d+$")) {
+            throw new RuntimeException(
+                    "Invalid Coupon Code, The coupon must starts with SAVE follow by the percentage discount!");
+        }
+        return code;
+    }
+
+    static public MyCoupon create(String code, int percentage, int quantity, LocalDate expiredAt, LocalDate createdAt) {
+        var isAvailable = false;
+        if (quantity > 0) {
+            isAvailable = true;
+        }
+        return new MyCoupon(code, percentage, isAvailable, quantity, 0, expiredAt, createdAt);
     }
 
     public double calcDiscountIn(double value) {
@@ -29,7 +62,7 @@ public class MyCoupon {
     }
 
     public void decreseUsage() {
-        
+
         if (this.used - 1 < 0) {
             throw new CouponUsageLimitEx(this.code);
         }

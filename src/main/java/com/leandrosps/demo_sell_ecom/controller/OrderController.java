@@ -2,8 +2,9 @@ package com.leandrosps.demo_sell_ecom.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.leandrosps.demo_sell_ecom.application.OrderService;
-import com.leandrosps.demo_sell_ecom.application.OrderService.ItemInputs;
+
+import com.leandrosps.demo_sell_ecom.application.services.OrderService;
+import com.leandrosps.demo_sell_ecom.application.services.OrderService.ItemInputs;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

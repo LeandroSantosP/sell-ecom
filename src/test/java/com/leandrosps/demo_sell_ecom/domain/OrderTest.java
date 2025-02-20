@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.leandrosps.demo_sell_ecom.geteways.FackClock;
 import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 
 @Tag("unit")
@@ -27,20 +28,7 @@ public class OrderTest {
       orderItems.add(new OrderItem("124", 20, "123", 2));
    }
 
-   private MyClock clock = new MyClock() {
-
-      private LocalDateTime date = LocalDateTime.of(2024, 02, 21, 0, 0);
-
-      @Override
-      public void setCurrentDate(LocalDateTime date) {
-         this.date = date;
-      }
-
-      @Override
-      public LocalDateTime getCurrentDate() {
-         return this.date;
-      };
-   };
+   private MyClock clock = new FackClock();
 
    @Test
    void shouldCreateAnValidTest() {
@@ -54,10 +42,13 @@ public class OrderTest {
 
    @Test
    void shouldBeAbleToAddAnCupomOf20off() {
+      this.clock.setCurrentDate(LocalDateTime.of(2024, 03, 21, 0, 0));
+
       var order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.", clock);
       order.addItems(orderItems.toArray(new OrderItem[0]));
       int percentage = 20;
-      var coupon = MyCoupon.craete("SAVE20", percentage, true, 2, LocalDate.of(2024, 03, 21));
+      var coupon = MyCoupon.create("SAVE20", percentage, 2, LocalDate.of(2024, 05, 21),
+            this.clock.getCurrentDate().toLocalDate());
 
       order.addCoupon(coupon);
       assertEquals(192, order.calcTotal(addressDefault), "The total of the order is incorrect!");

@@ -1,4 +1,4 @@
-package com.leandrosps.demo_sell_ecom.application;
+package com.leandrosps.demo_sell_ecom.application.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -31,7 +31,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.leandrosps.demo_sell_ecom.application.OrderService.ItemInputs;
+import com.leandrosps.demo_sell_ecom.application.services.OrderService.ItemInputs;
 import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.domain.Address;
@@ -39,6 +39,7 @@ import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
 import com.leandrosps.demo_sell_ecom.dtos.ResonseBody;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
+import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 import com.leandrosps.demo_sell_ecom.geteways.PaymentGeteWay;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 
@@ -47,14 +48,15 @@ import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Tag("integration")
 public class OrderServiceTest {
+    
     @Container
     @ServiceConnection
-    static final MySQLContainer mysqldb;
+    static final MySQLContainer<?> mysqldb;
 
     static {
-        mysqldb = new MySQLContainer("mysql:latest");
+        mysqldb = new MySQLContainer<>("mysql:latest");
         mysqldb.withDatabaseName("testdb").withUsername("testuser").withPassword("testpass")
-                .withInitScripts("schema.sql", "data.sql");
+                .withInitScripts("schema_test.sql", "data_test.sql");
         mysqldb.start();
     }
 
@@ -71,6 +73,9 @@ public class OrderServiceTest {
     @InjectMocks
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private MyClock clock;
 
     @Mock
     private AdressGeteWay adressGeteWay;
@@ -152,10 +157,10 @@ public class OrderServiceTest {
     }
 
     @Test
-    @Tag("current")
     void shouldBeAbleToAddAnCouponToTheOrder() {
-        this.couponRepository.persiste(MyCoupon.craete("SAVE10", 10, true, 2, LocalDate.of(2025, 3, 14)));
-        
+        this.clock.setCurrentDate(LocalDateTime.parse("2025-02-15T00:00:00"));
+        this.couponRepository.persiste(MyCoupon.create(null, 10, 2, LocalDate.of(2025, 3, 14), clock.getCurrentDate().toLocalDate()));
+
         Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
                 .thenReturn(new ResonseBody(200, "accept", "62887c55-38b2-4099-9e0c-1674756ea315"));
 
@@ -213,9 +218,9 @@ public class OrderServiceTest {
     }
 
     @Test
-    @Tag("current")
     void shouldProcessAnRefusedPaymentAndChangeTheStatusToRecussed() {
-        this.couponRepository.persiste(MyCoupon.craete("SAVE10", 10, true, 2, LocalDate.of(2025, 3, 14)));
+        this.clock.setCurrentDate(LocalDateTime.parse("2025-02-13T00:00:00"));
+        this.couponRepository.persiste(MyCoupon.create(null, 10, 2, LocalDate.of(2025, 2, 14), clock.getCurrentDate().toLocalDate()));
         Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
                 .thenReturn(new ResonseBody(400, "recussed", "62887c55-38b2-4099-9e0c-1674756ea315"));
 

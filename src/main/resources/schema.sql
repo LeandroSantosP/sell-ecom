@@ -98,6 +98,13 @@ ALTER TABLE
 ADD
    FOREIGN KEY (coupon) REFERENCES coupons(code);
 
+ALTER TABLE
+   coupons
+ADD
+   COLUMN used INTEGER NOT NULL DEFAULT 0
+AFTER
+   usage_limit;
+
 CREATE TABLE IF NOT EXISTS users (
    id INTEGER PRIMARY KEY AUTO_INCREMENT,
    username VARCHAR(150) UNIQUE NOT NULL,
@@ -105,6 +112,8 @@ CREATE TABLE IF NOT EXISTS users (
    email VARCHAR(100) UNIQUE NOT NULL,
    created_at DATE DEFAULT (NOW())
 );
+
+ALTER TABLE clients RENAME COLUMN email TO fk_email; 
 
 ALTER TABLE
    clients

@@ -1,4 +1,4 @@
-package com.leandrosps.demo_sell_ecom.application;
+package com.leandrosps.demo_sell_ecom.application.services;
 
 import java.util.List;
 import java.util.UUID;

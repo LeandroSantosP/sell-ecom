@@ -1,9 +1,7 @@
 package com.leandrosps.demo_sell_ecom.handlers;
 
 import org.springframework.stereotype.Component;
-import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.db.OrderRepository;
-import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
 import com.leandrosps.demo_sell_ecom.domain.events.PaymentOrderAcceptEvent;
 import com.leandrosps.demo_sell_ecom.domain.events.ProductStatusUpdated;
 import com.leandrosps.demo_sell_ecom.infra.mediator.IEvent;
@@ -19,12 +17,10 @@ public class PaymentAcceptHandler implements IHandler {
 	}
 
 	private OrderRepository orderRepository;
-	private CouponRepository couponRepository;
 	private Mediator mediator;
 
-	public PaymentAcceptHandler(OrderRepository orderRepository, CouponRepository couponRepository, Mediator mediator) {
+	public PaymentAcceptHandler(OrderRepository orderRepository, Mediator mediator) {
 		this.orderRepository = orderRepository;
-		this.couponRepository = couponRepository;
 		this.mediator = mediator;
 	}
 

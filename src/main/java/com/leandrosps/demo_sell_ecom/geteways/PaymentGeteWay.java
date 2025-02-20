@@ -1,18 +1,13 @@
 package com.leandrosps.demo_sell_ecom.geteways;
 
-import java.lang.System.Logger;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
-
 import com.leandrosps.demo_sell_ecom.dtos.ResonseBody;
 import com.leandrosps.demo_sell_ecom.errors.GetewayServerError;
-
 import lombok.extern.slf4j.Slf4j;
-
 import java.net.http.HttpClient;
 
 public interface PaymentGeteWay {

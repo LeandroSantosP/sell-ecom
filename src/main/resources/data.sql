@@ -1,7 +1,5 @@
 INSERT INTO roles (name) VALUES ('user');
 
-
-
 INSERT INTO
    users (username, password, email, roles)
 VALUES

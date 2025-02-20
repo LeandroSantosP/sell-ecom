@@ -1,4 +1,4 @@
-package com.leandrosps.demo_sell_ecom.application;
+package com.leandrosps.demo_sell_ecom.application.auth;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;

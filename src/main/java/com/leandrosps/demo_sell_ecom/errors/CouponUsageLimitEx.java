@@ -8,7 +8,7 @@ public class CouponUsageLimitEx extends RuntimeException {
     private ERROTYPE type = ERROTYPE.DEFAULT;
 
     public CouponUsageLimitEx(String code){
-        super("This coupon active its usage limite: "+ code);
+        super("This coupon reach its usage limite: " + code);
     }
     public String getType(){
         return this.type.toString();

@@ -2,11 +2,13 @@ package com.leandrosps.demo_sell_ecom.db;
 
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.stereotype.Repository;
 
 import com.leandrosps.demo_sell_ecom.db.dbmodels.CouponDbModel;
 import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 
+@Repository
 public interface CouponRepository extends ListCrudRepository<CouponDbModel, String>, CouponRepositoryCustom {
 }
 
@@ -45,9 +47,8 @@ class CouponRepositoryCustomImpl implements CouponRepositoryCustom {
         String sql = """
                 SELECT * from coupons WHERE code = :code
                 """;
-
         var couponDbData = this.jdbcClient.sql(sql).param("code", code).query(CouponDbModel.class).optional()
-                .orElseThrow(() -> new NotFoundEx("INVALID COUPON: " + code));
+                .orElseThrow(() -> new NotFoundEx("Coupon Not Found: " + code));
         return new MyCoupon(couponDbData.getCode(), couponDbData.getPercentage(), couponDbData.is_available(),
                 couponDbData.getUsage_limit(), couponDbData.getUsed(), couponDbData.getExpired_at(),
                 couponDbData.getCreated_at());
