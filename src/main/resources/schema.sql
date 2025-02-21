@@ -113,7 +113,8 @@ CREATE TABLE IF NOT EXISTS users (
    created_at DATE DEFAULT (NOW())
 );
 
-ALTER TABLE clients RENAME COLUMN email TO fk_email; 
+ALTER TABLE
+   clients RENAME COLUMN email TO fk_email;
 
 ALTER TABLE
    clients
@@ -129,3 +130,25 @@ CREATE TABLE IF NOT EXISTS roles (
    id INTEGER PRIMARY KEY AUTO_INCREMENT,
    name VARCHAR(50) UNIQUE NOT NULL
 );
+
+ALTER TABLE
+   users
+ADD
+   COLUMN enabled BOOLEAN NOT NULL DEFAULT 0
+AFTER
+   email;
+
+ALTER TABLE
+   users
+ADD
+   COLUMN verification_code VARCHAR(150) NOT NULL
+AFTER
+   email;
+
+
+ALTER TABLE
+   users
+ADD
+   COLUMN verification_expiration_at DATETIME NOT NULL
+AFTER
+   verification_code;

@@ -2,22 +2,37 @@ package com.leandrosps.demo_sell_ecom.config;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.leandrosps.demo_sell_ecom.application.auth.CustomAuthenticationProvider;
+import com.leandrosps.demo_sell_ecom.application.auth.CustomUserDetailsService;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -25,6 +40,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
 	@Value("${jwt.public.key}")
@@ -33,22 +49,45 @@ public class SecurityConfig {
 	@Value("${jwt.private.key}")
 	private RSAPrivateKey rsaPrivateKey;
 
-	@Autowired
-	private CustomAuthenticationProvider customAuthenticationProvider;
-
-	@Autowired
-	private void bindAuthenticationProvider(AuthenticationManagerBuilder authenticationManagerBuilder) {
-		authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider);
+	@Bean
+	public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder,
+			CustomUserDetailsService userDetailsService) throws Exception {
+		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+		provider.setPasswordEncoder(passwordEncoder);
+		provider.setUserDetailsService(userDetailsService);
+		return new ProviderManager(provider);
 	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.authorizeHttpRequests(auth -> {
-			auth.requestMatchers("/api/pub/**").permitAll();
+			auth.requestMatchers("/api/auth/**").permitAll();
 			auth.anyRequest().authenticated();
 		}).httpBasic(Customizer.withDefaults()).csrf(cdrf -> cdrf.disable())
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
+					jwt.jwtAuthenticationConverter(this.jwtAuthenticationConverter());
+				})).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.build();
+	}
+
+	private JwtAuthenticationConverter jwtAuthenticationConverter() {
+		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+
+			List<String> roles_authorities = jwt.getClaimAsStringList("user_roles");
+
+			if (roles_authorities == null) {
+				roles_authorities = Collections.emptyList();
+			}
+
+			JwtGrantedAuthoritiesConverter scopesConverter = new JwtGrantedAuthoritiesConverter();
+			Collection<GrantedAuthority> scopesAuthorities = scopesConverter.convert(jwt);
+			scopesAuthorities.addAll(roles_authorities.stream().map(SimpleGrantedAuthority::new).toList());
+			return scopesAuthorities;
+		});
+
+		return jwtAuthenticationConverter;
 	}
 
 	@Bean
@@ -63,14 +102,8 @@ public class SecurityConfig {
 		return new NimbusJwtEncoder(jwks);
 	}
 
-	/*
-	 * @Bean public UserDetailsService userDetailsService() { UserDetails user =
-	 * User.builder() .username("user") .password("{noop}senha123") .roles("USER")
-	 * .build();
-	 * 
-	 * UserDetails admin = User.builder().username("admin")
-	 * .password("{bcrypt}senha123").roles("USER", "ADMIN") .build();
-	 * 
-	 * return new InMemoryUserDetailsManager(user, admin); }
-	 */
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	};
 }

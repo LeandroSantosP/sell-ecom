@@ -8,8 +8,6 @@ import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
 import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 
-import jakarta.validation.constraints.NotNull;
-
 @Service
 public class CouponService {
     private CouponRepository couponRepository;

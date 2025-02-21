@@ -1,13 +1,10 @@
-package com.leandrosps.demo_sell_ecom.controller;
+package com.leandrosps.demo_sell_ecom.errors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import com.leandrosps.demo_sell_ecom.errors.GetewayServerError;
-import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 
 @ControllerAdvice
 public class ExecutionsHandler extends ResponseEntityExceptionHandler {
@@ -24,6 +21,13 @@ public class ExecutionsHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(GetewayServerError.class)
     private ResponseEntity<HttpExeptionFormater> getewayServerError(GetewayServerError ex) {
         var exFormatter = new HttpExeptionFormater(ex.getType(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exFormatter);
+    }
+
+    @ExceptionHandler(Exception.class)
+    private ResponseEntity<HttpExeptionFormater> runTimeEx(Exception ex){
+        ex.printStackTrace();
+        var exFormatter = new HttpExeptionFormater("RuntimeException", ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exFormatter);
     }
 }

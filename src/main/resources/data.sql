@@ -1,9 +1,26 @@
-INSERT INTO roles (name) VALUES ('user');
+INSERT INTO
+   roles (name)
+VALUES
+   ('{"role": "user"}');
 
 INSERT INTO
-   users (username, password, email, roles)
+   users (
+      username,
+      password,
+      email,
+      verification_expiration_at,
+      verification_code,
+      roles
+   )
 VALUES
-('johnUser', "$2y$07$FON2hxYEWLW9W5CmCdyba.gjF.AL3C5kgHK1Ov8sko3DJ8SSsWNJu", "joao@exemplo.com.br", '["user"]');
+   (
+      'johnUser',
+      "$2y$07$FON2hxYEWLW9W5CmCdyba.gjF.AL3C5kgHK1Ov8sko3DJ8SSsWNJu",
+      "joao@exemplo.com.br",
+      "2025-02-12T00:00:00",
+      "342342",
+      '{"role": "user"}'
+   );
 
 INSERT INTO
    clients (id, name, fk_email, city, birthday)
@@ -13,7 +30,7 @@ VALUES
       'João Pereira',
       'joao@exemplo.com.br',
       'Rio de Janeiro',
-      '1999-02-06' 
+      '1999-02-06'
    );
 
 INSERT INTO

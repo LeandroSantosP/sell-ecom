@@ -87,7 +87,6 @@ public class OrderService {
 		var order = this.orderRepository.getOrder(order_id);
 
 		var response = this.paymentGeteWay.execut(gatewayToken);
-		System.out.println("HERE: " + response);
 
 		if (response.status_code() == 400 || response.status().equals("recussed")) {
 			this.mediator

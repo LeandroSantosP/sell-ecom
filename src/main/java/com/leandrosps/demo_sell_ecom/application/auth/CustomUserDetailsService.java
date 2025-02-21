@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,18 +31,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 			throw new BadCredentialsException("Bad Credentials");
 		}
 		var user = userDatabase.get();
-		System.out.println(user.getRoles());
-		return new User(user.getUsername(), user.getPassword(),
-				getAuthorities(user.getRoles()));
-	}
-	
-	private Collection<? extends GrantedAuthority> getAuthorities(List<String> roles) {
-		List<GrantedAuthority> authorities = new ArrayList<>();
-		if (roles != null) {
-			for (String role : roles) {
-				authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
-			}
+		var roles_json = new JSONArray(user.getRoles());
+		List<String> roles = new ArrayList<>();
+		for (int i = 0; i < roles_json.length(); i++) {
+			roles.add(roles_json.getString(i));
 		}
-		return authorities;
+		return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
 	}
+
 }
