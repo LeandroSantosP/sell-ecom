@@ -3,12 +3,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 enum ERROTYPE {
-    DEFAULT
+    HANDLE,
+    NOT_CUSTOM, 
+    INTERNAL
 }
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class NotFoundEx extends RuntimeException {
-     private ERROTYPE type = ERROTYPE.DEFAULT;
+     private ERROTYPE type = ERROTYPE.HANDLE;
 
     public NotFoundEx(String mss){
         super(mss);
@@ -17,7 +19,7 @@ public class NotFoundEx extends RuntimeException {
         super();
     }
 
-    public String getType(){
-        return this.type.toString();
+    public ERROTYPE getType(){
+        return this.type;
     }
 }

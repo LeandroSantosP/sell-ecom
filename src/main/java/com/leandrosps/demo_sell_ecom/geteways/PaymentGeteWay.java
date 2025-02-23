@@ -3,7 +3,10 @@ package com.leandrosps.demo_sell_ecom.geteways;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Random;
+
 import org.json.JSONObject;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import com.leandrosps.demo_sell_ecom.dtos.ResonseBody;
 import com.leandrosps.demo_sell_ecom.errors.GetewayServerError;
@@ -16,6 +19,20 @@ public interface PaymentGeteWay {
 
 @Slf4j
 @Component
+class MyHttpClientFack implements PaymentGeteWay {
+	@Override
+	public ResonseBody execut(String token) {
+		int randomNumber = new Random().nextInt(100); // Generates a random number between 0 and 99
+		if (randomNumber <= 50) {
+			return new ResonseBody(200, "accept", token);
+		}
+		return new ResonseBody(400, "recussed", token);
+	}
+}
+
+@Slf4j
+@Component
+@Primary
 class MyHttpClinet implements PaymentGeteWay {
 
 	private HttpClient client = HttpClient.newHttpClient();

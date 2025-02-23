@@ -56,7 +56,7 @@ public class OrderServiceTest {
     static {
         mysqldb = new MySQLContainer<>("mysql:latest");
         mysqldb.withDatabaseName("testdb").withUsername("testuser").withPassword("testpass")
-                .withInitScripts("schema_test.sql", "data_test.sql");
+                .withInitScripts("schema.sql", "data.sql");
         mysqldb.start();
     }
 
@@ -170,11 +170,10 @@ public class OrderServiceTest {
         var id = assertDoesNotThrow(
                 () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", "SAVE10"));
 
-        this.orderService.makePayment(id, "62887c55-38b2-4099-9e0c-1674756ea315");
         var usedCouponAfter = couponRepository.findById("SAVE10").get();
-
         var order = this.orderQueryService.getOrderById(id);
 
+        assertEquals("WAITING_PAYMENT", order.getStatus());
         assertEquals(1, usedCouponAfter.getUsed());
         assertThat(order.getTotal()).isEqualTo(945);
         assertEquals("SAVE10", order.getCoupon());

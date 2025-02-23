@@ -17,10 +17,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@ToString
 @Table("users")
 public class UserDbModel implements UserDetails {
 	@Id
@@ -36,6 +38,7 @@ public class UserDbModel implements UserDetails {
 	@Column(value = "verification_expiration_at")
 	private LocalDateTime verificationCodeExpiresAt;
 
+	
 	@Column(value = "roles")
 	private String roles;
 
@@ -47,7 +50,19 @@ public class UserDbModel implements UserDetails {
 		this.enabled = false;
 		this.validationCode = this.generateVerificationCode();
 		this.verificationCodeExpiresAt = LocalDateTime.now().plusMinutes(15);
-		this.roles = "user";
+		
+		this.roles = "[\"user\"]";
+	}
+
+	public void addRoles(String... newRoles) {
+		JSONArray rolesArray = new JSONArray(this.roles);
+
+		for (String role : newRoles) {
+			if (!rolesArray.toList().contains(role)) {
+				rolesArray.put(role);
+			}
+		}
+		this.roles = rolesArray.toString();
 	}
 
 	public UserDbModel(){
@@ -57,6 +72,10 @@ public class UserDbModel implements UserDetails {
 		Random random = new Random();
 		int code = random.nextInt(900000) + 100000;
 		return String.valueOf(code);
+	}
+
+	public void resetValidationCode() {
+		this.validationCode = this.generateVerificationCode();
 	}
 
 	@Override

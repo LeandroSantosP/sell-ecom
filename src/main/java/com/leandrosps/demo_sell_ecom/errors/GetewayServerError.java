@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public class GetewayServerError extends RuntimeException {
-	private ERROTYPE type = ERROTYPE.DEFAULT;
+	private ERROTYPE type = ERROTYPE.HANDLE;
 
 	public GetewayServerError(String geteway, String mss) {
 		super("Error on Geteway Server: " + geteway + " " + mss);
 	}
 
-	public String getType() {
-		return this.type.toString();
+	public ERROTYPE getType() {
+		return this.type;
 	}
 }

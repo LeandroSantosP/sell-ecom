@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,8 @@ import com.leandrosps.demo_sell_ecom.application.services.CouponService.CreateCo
 import com.leandrosps.demo_sell_ecom.application.services.CouponService.GetCouponOutput;
 
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 @RestController
 @RequestMapping("/api/coupons")
@@ -41,13 +44,11 @@ public class CouponController {
 	public ResponseEntity<Void> createcoupon(@Valid @RequestBody CreateCouponInput input,
 			@AuthenticationPrincipal Jwt jwt) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (jwt != null) {
-			System.out.println("jwt: " + jwt.getClaimAsString("user_roles"));
-		}
 		System.out.println(authentication.isAuthenticated());
 		System.out.println(authentication.getAuthorities());
 		this.couponService.create(input);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
+
 
 }

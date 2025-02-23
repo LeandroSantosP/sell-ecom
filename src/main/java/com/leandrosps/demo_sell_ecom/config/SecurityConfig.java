@@ -61,6 +61,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.authorizeHttpRequests(auth -> {
+			auth.requestMatchers("/api/auth/priv/**").authenticated();
 			auth.requestMatchers("/api/auth/**").permitAll();
 			auth.anyRequest().authenticated();
 		}).httpBasic(Customizer.withDefaults()).csrf(cdrf -> cdrf.disable())
@@ -74,6 +75,7 @@ public class SecurityConfig {
 		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
 
 		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+			
 
 			List<String> roles_authorities = jwt.getClaimAsStringList("user_roles");
 

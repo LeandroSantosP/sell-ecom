@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class CouponUsageLimitEx extends RuntimeException {
-    private ERROTYPE type = ERROTYPE.DEFAULT;
+    private ERROTYPE type = ERROTYPE.HANDLE;
 
     public CouponUsageLimitEx(String code){
         super("This coupon reach its usage limite: " + code);

@@ -9,7 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ExecutionsHandler extends ResponseEntityExceptionHandler {
 
-    private record HttpExeptionFormater(String type, String message) {
+    private record HttpExeptionFormater(ERROTYPE type, String message) {
     }
 
     @ExceptionHandler(NotFoundEx.class)
@@ -21,13 +21,19 @@ public class ExecutionsHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(GetewayServerError.class)
     private ResponseEntity<HttpExeptionFormater> getewayServerError(GetewayServerError ex) {
         var exFormatter = new HttpExeptionFormater(ex.getType(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exFormatter);
+        return ResponseEntity.internalServerError().body(exFormatter);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    private ResponseEntity<HttpExeptionFormater> runtimeEx(RuntimeException ex) {
+        ex.printStackTrace();
+        var exFormatter = new HttpExeptionFormater(ERROTYPE.NOT_CUSTOM, ex.getMessage());
+        return ResponseEntity.badRequest().body(exFormatter);
     }
 
     @ExceptionHandler(Exception.class)
-    private ResponseEntity<HttpExeptionFormater> runTimeEx(Exception ex){
-        ex.printStackTrace();
-        var exFormatter = new HttpExeptionFormater("RuntimeException", ex.getMessage());
+    private ResponseEntity<HttpExeptionFormater> internalError(Exception ex){
+        var exFormatter = new HttpExeptionFormater(ERROTYPE.INTERNAL, ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exFormatter);
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class InvalidCouponExpireDate extends IllegalArgumentException {
 
-	private ERROTYPE type = ERROTYPE.DEFAULT;
+	private ERROTYPE type = ERROTYPE.HANDLE;
 
 	public InvalidCouponExpireDate() {
 		super("Ivalid Coupon ExpiredDate!");

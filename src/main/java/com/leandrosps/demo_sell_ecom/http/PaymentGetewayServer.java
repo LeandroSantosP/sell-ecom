@@ -42,7 +42,6 @@ public class PaymentGetewayServer {
 			} catch (Exception e) {
 				log.error("Error on reader the request body!", e);
 			}
-			log.info("OK2");
 
 			if (requestBody == null) {
 				throw new RuntimeException("Invalid requestbody!");
@@ -51,7 +50,6 @@ public class PaymentGetewayServer {
 			var mapper = new ObjectMapper();
 			var body = mapper.readValue(requestBody, ProcessePaymentBody.class);
 
-			log.info("OK2" + requestBody);
 
 			switch (exchange.getRequestMethod()) {
 			case "POST":

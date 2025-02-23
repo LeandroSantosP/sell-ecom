@@ -80,7 +80,7 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
 		/* Create An Restore method for Order latter */
 		if (order_id == null || order_id.isEmpty()) {
-			throw new IllegalArgumentException("Order ID cannot be null or empty");
+			throw new NotFoundEx("Order ID cannot be null or empty");
 		}
 
 		var sqlOrderData = """
