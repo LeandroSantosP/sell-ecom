@@ -26,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -39,6 +40,7 @@ import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
 import com.leandrosps.demo_sell_ecom.dtos.ResonseBody;
 import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
 import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
+import com.leandrosps.demo_sell_ecom.geteways.Mail;
 import com.leandrosps.demo_sell_ecom.geteways.MyClock;
 import com.leandrosps.demo_sell_ecom.geteways.PaymentGeteWay;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
@@ -48,7 +50,7 @@ import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Tag("integration")
 public class OrderServiceTest {
-    
+
     @Container
     @ServiceConnection
     static final MySQLContainer<?> mysqldb;
@@ -80,12 +82,16 @@ public class OrderServiceTest {
     @Mock
     private AdressGeteWay adressGeteWay;
 
+    @MockBean
+    private Mail mail;
+
     @Mock
     private PaymentGeteWay paymentGeteWay;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        Mockito.doNothing().when(mail).send(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("MG", "Belo horizonte", "36300008"));
         this.orderRepository.deleteAll();
         this.couponRepository.deleteAll();
@@ -159,7 +165,8 @@ public class OrderServiceTest {
     @Test
     void shouldBeAbleToAddAnCouponToTheOrder() {
         this.clock.setCurrentDate(LocalDateTime.parse("2025-02-15T00:00:00"));
-        this.couponRepository.persiste(MyCoupon.create(null, 10, 2, LocalDate.of(2025, 3, 14), clock.getCurrentDate().toLocalDate()));
+        this.couponRepository.persiste(
+                MyCoupon.create(null, 10, 2, LocalDate.of(2025, 3, 14), clock.getCurrentDate().toLocalDate()));
 
         Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
                 .thenReturn(new ResonseBody(200, "accept", "62887c55-38b2-4099-9e0c-1674756ea315"));
@@ -219,10 +226,10 @@ public class OrderServiceTest {
     @Test
     void shouldProcessAnRefusedPaymentAndChangeTheStatusToRecussed() {
         this.clock.setCurrentDate(LocalDateTime.parse("2025-02-13T00:00:00"));
-        this.couponRepository.persiste(MyCoupon.create(null, 10, 2, LocalDate.of(2025, 2, 14), clock.getCurrentDate().toLocalDate()));
+        this.couponRepository.persiste(
+                MyCoupon.create(null, 10, 2, LocalDate.of(2025, 2, 14), clock.getCurrentDate().toLocalDate()));
         Mockito.when(paymentGeteWay.execut("62887c55-38b2-4099-9e0c-1674756ea315"))
                 .thenReturn(new ResonseBody(400, "recussed", "62887c55-38b2-4099-9e0c-1674756ea315"));
-
         List<ItemInputs> itemsInput = new ArrayList<>();
         itemsInput.add(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 3));
 
