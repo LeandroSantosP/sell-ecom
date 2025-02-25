@@ -3,11 +3,7 @@ package com.leandrosps.demo_sell_ecom.application.services;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
-import com.leandrosps.demo_sell_ecom.db.ClientRepository;
-import com.leandrosps.demo_sell_ecom.db.CouponRepository;
-import com.leandrosps.demo_sell_ecom.db.OrderRepository;
-import com.leandrosps.demo_sell_ecom.db.ProductRepository;
-import com.leandrosps.demo_sell_ecom.db.dbmodels.ClientDbModel;
+
 import com.leandrosps.demo_sell_ecom.domain.Address;
 import com.leandrosps.demo_sell_ecom.domain.Client;
 import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
@@ -15,10 +11,15 @@ import com.leandrosps.demo_sell_ecom.domain.Order;
 import com.leandrosps.demo_sell_ecom.domain.OrderItem;
 import com.leandrosps.demo_sell_ecom.domain.events.PaymentOrderAcceptEvent;
 import com.leandrosps.demo_sell_ecom.domain.events.PaymentOrderRefussedEvent;
-import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
-import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
-import com.leandrosps.demo_sell_ecom.geteways.MyClock;
-import com.leandrosps.demo_sell_ecom.geteways.PaymentGeteWay;
+import com.leandrosps.demo_sell_ecom.infra.db.ClientRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.CouponRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.OrderRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.ProductRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.dbmodels.ClientDbModel;
+import com.leandrosps.demo_sell_ecom.infra.errors.NotFoundEx;
+import com.leandrosps.demo_sell_ecom.infra.geteways.AdressGeteWay;
+import com.leandrosps.demo_sell_ecom.infra.geteways.MyClock;
+import com.leandrosps.demo_sell_ecom.infra.geteways.PaymentGeteWay;
 import com.leandrosps.demo_sell_ecom.infra.mediator.Mediator;
 
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,7 @@ public class OrderService {
 	}
 
 	public String placeOrder(String email, List<ItemInputs> orderItems, String addressCode, String couponCode) {
+		System.out.println(this.clientRepository.count());
 		ClientDbModel clientData = this.clientRepository.findByFkEmail(email).orElseThrow(() -> new NotFoundEx());
 		Client client = new Client(UUID.fromString(clientData.id()), clientData.name(), clientData.fkEmail(),
 				clientData.city(), clientData.birthday(), clientData.create_at());

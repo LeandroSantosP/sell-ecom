@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.leandrosps.demo_sell_ecom.geteways.FackClock;
-import com.leandrosps.demo_sell_ecom.geteways.MyClock;
+import com.leandrosps.demo_sell_ecom.infra.geteways.FackClock;
+import com.leandrosps.demo_sell_ecom.infra.geteways.MyClock;
 
 @Tag("unit")
 public class OrderTest {

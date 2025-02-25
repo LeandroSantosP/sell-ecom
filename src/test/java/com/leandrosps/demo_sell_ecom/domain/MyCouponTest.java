@@ -13,10 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import com.leandrosps.demo_sell_ecom.errors.CouponUsageLimitEx;
-import com.leandrosps.demo_sell_ecom.errors.InvalidCouponExpireDate;
-import com.leandrosps.demo_sell_ecom.geteways.FackClock;
-import com.leandrosps.demo_sell_ecom.geteways.MyClock;
+import com.leandrosps.demo_sell_ecom.infra.errors.CouponUsageLimitEx;
+import com.leandrosps.demo_sell_ecom.infra.errors.InvalidCouponExpireDate;
+import com.leandrosps.demo_sell_ecom.infra.geteways.FackClock;
+import com.leandrosps.demo_sell_ecom.infra.geteways.MyClock;
 
 @Tag("unit")
 public class MyCouponTest {

@@ -2,11 +2,11 @@ package com.leandrosps.demo_sell_ecom.handlers;
 
 import org.springframework.stereotype.Component;
 
-import com.leandrosps.demo_sell_ecom.db.CouponRepository;
-import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.domain.events.PaymentOrderRefussedEvent;
 import com.leandrosps.demo_sell_ecom.domain.events.ProductStatusUpdated;
-import com.leandrosps.demo_sell_ecom.geteways.Mail;
+import com.leandrosps.demo_sell_ecom.infra.db.CouponRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.OrderRepository;
+import com.leandrosps.demo_sell_ecom.infra.geteways.Mail;
 import com.leandrosps.demo_sell_ecom.infra.mediator.IEvent;
 import com.leandrosps.demo_sell_ecom.infra.mediator.IHandler;
 import com.leandrosps.demo_sell_ecom.infra.mediator.Mediator;

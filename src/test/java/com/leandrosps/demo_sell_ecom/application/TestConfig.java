@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.leandrosps.demo_sell_ecom.domain.Address;
-import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
+import com.leandrosps.demo_sell_ecom.infra.geteways.AdressGeteWay;
 
 @Configuration 
 public class TestConfig {

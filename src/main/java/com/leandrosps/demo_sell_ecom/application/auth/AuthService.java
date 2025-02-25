@@ -1,6 +1,7 @@
 package com.leandrosps.demo_sell_ecom.application.auth;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,12 +17,14 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-import com.leandrosps.demo_sell_ecom.db.RoleRepository;
-import com.leandrosps.demo_sell_ecom.db.UserRepository;
-import com.leandrosps.demo_sell_ecom.db.dbmodels.UserDbModel;
-import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
-import com.leandrosps.demo_sell_ecom.geteways.Mail;
-import com.leandrosps.demo_sell_ecom.geteways.MyClock;
+import com.leandrosps.demo_sell_ecom.application.services.ClientService;
+import com.leandrosps.demo_sell_ecom.application.services.ClientService.CreateInput;
+import com.leandrosps.demo_sell_ecom.infra.db.RoleRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.UserRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.dbmodels.UserDbModel;
+import com.leandrosps.demo_sell_ecom.infra.errors.NotFoundEx;
+import com.leandrosps.demo_sell_ecom.infra.geteways.Mail;
+import com.leandrosps.demo_sell_ecom.infra.geteways.MyClock;
 
 @Service
 public class AuthService {
@@ -32,21 +35,23 @@ public class AuthService {
 	private JwtEncoder jwtEncoder;
 	private PasswordEncoder passwordEncoder;
 	private Mail mail;
+	private ClientService clientService;
 	private MyClock clock;
 
 	public AuthService(UserRepository userRepository, RoleRepository roleRepository,
 			AuthenticationManager authenticationManager, JwtEncoder jwtEncoder, PasswordEncoder passwordEncoder,
-			Mail mail, MyClock clock) {
+			Mail mail, ClientService clientService, MyClock clock) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
 		this.authenticationManager = authenticationManager;
 		this.jwtEncoder = jwtEncoder;
 		this.passwordEncoder = passwordEncoder;
 		this.mail = mail;
+		this.clientService = clientService;
 		this.clock = clock;
 	}
 
-	public record RegisterUserDto(String email, String password, String username) {
+	public record RegisterUserDto(String email, String password, String username, String name, String city, LocalDate birthday) {
 	}
 
 	private void sendMail(String code, String subject, String to) {
@@ -71,6 +76,7 @@ public class AuthService {
 		var user = new UserDbModel(input.username(), passwordEncoder.encode(input.password()), input.email());
 		this.sendMail(user.getValidationCode(), "Account Verification", user.getEmail());
 		this.userRepository.save(user);
+		this.clientService.create(new CreateInput(input.name(), user.getEmail(), user.getPassword(), input.city(), input.birthday()));
 	}
 
 	public record VerifyCodeInput(String email, String code) {
@@ -89,8 +95,11 @@ public class AuthService {
 		if (user.getVerificationCodeExpiresAt().isBefore(this.clock.getCurrentDate())) {
 			throw new IllegalArgumentException("Verificaition code has expired!");
 		}
+
 		user.setEnabled(true);
-		return this.userRepository.save(user).getId();
+		
+		var user_id = this.userRepository.save(user).getId();
+		return user_id; 
 	}
 
 	public record ResendInput(String email) {

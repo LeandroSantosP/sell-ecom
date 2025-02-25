@@ -1,6 +1,6 @@
 services:
   ecom-mysql:
-    image: 'mysql:latest'
+    image: 'mysql:8.1'
     container_name: "sell-ecom"
     environment:
       - 'MYSQL_DATABASE=sell-ecom'

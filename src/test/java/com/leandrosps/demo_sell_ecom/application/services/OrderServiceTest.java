@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,18 +33,18 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import com.leandrosps.demo_sell_ecom.application.services.OrderService.ItemInputs;
-import com.leandrosps.demo_sell_ecom.db.CouponRepository;
-import com.leandrosps.demo_sell_ecom.db.OrderRepository;
 import com.leandrosps.demo_sell_ecom.domain.Address;
 import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
 import com.leandrosps.demo_sell_ecom.dtos.ResonseBody;
-import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
-import com.leandrosps.demo_sell_ecom.geteways.AdressGeteWay;
-import com.leandrosps.demo_sell_ecom.geteways.Mail;
-import com.leandrosps.demo_sell_ecom.geteways.MyClock;
-import com.leandrosps.demo_sell_ecom.geteways.PaymentGeteWay;
+import com.leandrosps.demo_sell_ecom.infra.db.ClientRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.CouponRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.OrderRepository;
+import com.leandrosps.demo_sell_ecom.infra.errors.NotFoundEx;
+import com.leandrosps.demo_sell_ecom.infra.geteways.AdressGeteWay;
+import com.leandrosps.demo_sell_ecom.infra.geteways.Mail;
+import com.leandrosps.demo_sell_ecom.infra.geteways.MyClock;
+import com.leandrosps.demo_sell_ecom.infra.geteways.PaymentGeteWay;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
 
 @SpringBootTest
@@ -56,9 +58,8 @@ public class OrderServiceTest {
     static final MySQLContainer<?> mysqldb;
 
     static {
-        mysqldb = new MySQLContainer<>("mysql:latest");
-        mysqldb.withDatabaseName("testdb").withUsername("testuser").withPassword("testpass")
-                .withInitScripts("schema.sql", "data.sql");
+        mysqldb = new MySQLContainer<>("mysql:8.1");
+        mysqldb.withDatabaseName("testdb").withUsername("testuser").withPassword("testpass");
         mysqldb.start();
     }
 
@@ -77,11 +78,15 @@ public class OrderServiceTest {
     private OrderService orderService;
 
     @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
     private MyClock clock;
 
     @Mock
     private AdressGeteWay adressGeteWay;
 
+    @SuppressWarnings("removal")
     @MockBean
     private Mail mail;
 
@@ -89,7 +94,7 @@ public class OrderServiceTest {
     private PaymentGeteWay paymentGeteWay;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws SQLException, IOException {
         MockitoAnnotations.openMocks(this);
         Mockito.doNothing().when(mail).send(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         Mockito.when(adressGeteWay.getAdress("36300008")).thenReturn(new Address("MG", "Belo horizonte", "36300008"));
@@ -103,9 +108,13 @@ public class OrderServiceTest {
     }
 
     @Test
-    void testMySqlConn() {
+    @Tag("current")
+    void testMySqlConnAndInitialValues() {
         assertThat(mysqldb.isCreated()).isTrue();
         assertThat(mysqldb.isRunning()).isTrue();
+        var initial_client = this.clientRepository.findByFkEmail("joao@exemplo.com.br");
+        assert initial_client.isPresent() == true;
+        assert initial_client.get().fkEmail().equals("joao@exemplo.com.br");
     }
 
     private static String client_id_db = "1fef5e47-5ab0-4391-b0a0-49592e977578";

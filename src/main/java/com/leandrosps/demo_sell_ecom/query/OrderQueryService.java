@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
-import com.leandrosps.demo_sell_ecom.db.OrderRepository;
-import com.leandrosps.demo_sell_ecom.db.dbmodels.ClientDbModel;
-import com.leandrosps.demo_sell_ecom.db.dbmodels.OrderDbModel;
-import com.leandrosps.demo_sell_ecom.db.dbmodels.OrderItemDbModel;
-import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
+
+import com.leandrosps.demo_sell_ecom.infra.db.OrderRepository;
+import com.leandrosps.demo_sell_ecom.infra.db.dbmodels.ClientDbModel;
+import com.leandrosps.demo_sell_ecom.infra.db.dbmodels.OrderDbModel;
+import com.leandrosps.demo_sell_ecom.infra.db.dbmodels.OrderItemDbModel;
+import com.leandrosps.demo_sell_ecom.infra.errors.NotFoundEx;
 
 import lombok.Getter;
 

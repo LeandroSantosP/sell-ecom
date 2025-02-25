@@ -4,9 +4,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import com.leandrosps.demo_sell_ecom.errors.ExpiredCoupon;
-import com.leandrosps.demo_sell_ecom.errors.NotFoundEx;
-import com.leandrosps.demo_sell_ecom.geteways.MyClock;
+
+import com.leandrosps.demo_sell_ecom.infra.errors.ExpiredCoupon;
+import com.leandrosps.demo_sell_ecom.infra.errors.NotFoundEx;
+import com.leandrosps.demo_sell_ecom.infra.geteways.MyClock;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;

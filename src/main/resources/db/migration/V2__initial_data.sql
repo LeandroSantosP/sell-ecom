@@ -15,6 +15,7 @@ INSERT INTO
       email,
       verification_expiration_at,
       verification_code,
+      enabled,
       roles
    )
 VALUES
@@ -24,6 +25,7 @@ VALUES
       "joao@exemplo.com.br",
       "2025-02-12T00:00:00",
       "342342",
+      1,
       '["admin", "user"]'
    );
 
@@ -54,7 +56,7 @@ VALUES
       'WAITING_PAYMENT',
       '1fef5e47-5ab0-4391-b0a0-49592e977578',
       'joao@exemplo.com.br',
-      '2025-02-07T13:38:06.399843833'
+      '2025-02-07T13:38:06.00'
    );
 
 INSERT INTO

@@ -2,8 +2,9 @@ package com.leandrosps.demo_sell_ecom.domain;
 
 import java.time.LocalDate;
 
-import com.leandrosps.demo_sell_ecom.errors.CouponUsageLimitEx;
-import com.leandrosps.demo_sell_ecom.errors.InvalidCouponExpireDate;
+import com.leandrosps.demo_sell_ecom.infra.errors.CouponUsageLimitEx;
+import com.leandrosps.demo_sell_ecom.infra.errors.InvalidCouponExpireDate;
+
 import lombok.Getter;
 
 @Getter

@@ -4,9 +4,9 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 
-import com.leandrosps.demo_sell_ecom.db.CouponRepository;
 import com.leandrosps.demo_sell_ecom.domain.MyCoupon;
-import com.leandrosps.demo_sell_ecom.geteways.MyClock;
+import com.leandrosps.demo_sell_ecom.infra.db.CouponRepository;
+import com.leandrosps.demo_sell_ecom.infra.geteways.MyClock;
 
 @Service
 public class CouponService {

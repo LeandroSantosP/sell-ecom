@@ -16,4 +16,9 @@ public class Client {
    String city;
    LocalDate birthday;
    LocalDateTime createAt;
+
+   public static Client create(String name, String email, String password, String city, LocalDate birthday) {
+      return new Client(UUID.randomUUID(), name, email, city, birthday, LocalDateTime.now());
+   }
+
 }
