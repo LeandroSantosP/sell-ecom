@@ -35,10 +35,16 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@SecurityScheme(name = SecurityConfig.SECURITY, type = SecuritySchemeType.HTTP, bearerFormat = "JWT", scheme = "bearer")
 public class SecurityConfig {
+
+	public static final String SECURITY = "bearerAuth";
 
 	@Value("${jwt.public.key}")
 	private RSAPublicKey rsaPublicKey;
@@ -59,6 +65,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.authorizeHttpRequests(auth -> {
 			auth.requestMatchers("/api/auth/priv/**").authenticated();
+            auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 			auth.requestMatchers("/api/auth/**").permitAll();
 			auth.anyRequest().authenticated();
 		}).httpBasic(Customizer.withDefaults()).csrf(cdrf -> cdrf.disable())
@@ -72,7 +79,6 @@ public class SecurityConfig {
 		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
 
 		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
-			
 
 			List<String> roles_authorities = jwt.getClaimAsStringList("user_roles");
 

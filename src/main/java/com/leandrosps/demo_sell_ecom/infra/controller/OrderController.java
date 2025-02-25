@@ -5,7 +5,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.leandrosps.demo_sell_ecom.application.services.OrderService;
 import com.leandrosps.demo_sell_ecom.application.services.OrderService.ItemInputs;
+import com.leandrosps.demo_sell_ecom.infra.config.SecurityConfig;
 import com.leandrosps.demo_sell_ecom.query.OrderQueryService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -17,8 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+@Tag(name = "Orders", description = "Controller to create/get new orders!")
 @RestController
 @RequestMapping("/api/orders")
+@SecurityRequirement(name = SecurityConfig.SECURITY)
 public class OrderController {
     private OrderService orderService;
     private OrderQueryService orderQueryService;
@@ -38,6 +46,11 @@ public class OrderController {
             @NotNull String getewaytoken, @NotNull String addressCode, String coupon) {
     }
 
+    @Operation(summary = "Create news Order.", description = "Usecase for that users can places orders.")
+    @ApiResponse(responseCode = "201", description = "Orderd created with success!")
+    @ApiResponse(responseCode = "404", description = "Product not founded!")
+    @ApiResponse(responseCode = "400", description = "Invalid request: Address is not valid, coupon has expired, or state is invalid.")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error!")
     @PostMapping("/place-order")
     public ResponseEntity<?> placeOrder(@Valid @RequestBody InputOrderController input) {
         String product_id = this.orderService.placeOrder(input.email(), input.items(), input.addressCode(),
@@ -48,6 +61,11 @@ public class OrderController {
     public record MakePaymenBody(@NotNull String payment_token) {
     }
 
+    @Operation(summary = "Make the payment.", description = "Usecase for that users can make the order payment..")
+    @ApiResponse(responseCode = "200", description = "Processing the payment!")
+    @ApiResponse(responseCode = "404", description = "Order not founded!")
+    @ApiResponse(responseCode = "400", description = "Invalid request: Address is not valid, coupon has expired, or state is invalid.")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error!")
     @PostMapping("/make-payment/{order_id}")
     public ResponseEntity<ReguesBody> makePayment(@NotNull @PathVariable String order_id,
             @RequestBody MakePaymenBody body) {
