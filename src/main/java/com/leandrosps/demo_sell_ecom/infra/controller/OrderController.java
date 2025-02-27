@@ -73,6 +73,10 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Cancel a Order!", description = "Use Case for cancel a order!!")
+	@ApiResponse(responseCode = "204", description = "Order Canceled!")
+	@ApiResponse(responseCode = "400", description = "This order has already been paid!")
+	@ApiResponse(responseCode = "500", description = "Internal Server Error!")
     @PostMapping("/cancel-order/{order_id}")
     public ResponseEntity<?> cancelOrder(@NotNull @PathVariable String order_id) {
         this.orderService.cancelOrder(order_id);

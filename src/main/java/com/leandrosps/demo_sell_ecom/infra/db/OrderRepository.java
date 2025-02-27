@@ -54,7 +54,7 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 				VALUES
 				    (:id, :total, :status, :client_id, :client_email, :coupon, :created_at)
 				    """;
-					
+
 		this.jdbcClient.sql(sqlCreateOrder).param("id", order.getId())
 				/* fix this address later */
 				.param("total", order.getTotal()).param("status", order.getStatus())
@@ -123,6 +123,8 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 			status = Status.RECUSSED;
 		} else if (orderData.getStatus().equals("PAID")) {
 			status = Status.PAID;
+		} else if(orderData.getStatus().equals("CANCEL") ){
+			status = Status.CANCEL;
 		}
 		return new Order(orderData.getId(), orderData.getClient_id(), orderData.getClient_email(), status, orderItems,
 				coupons, orderData.getTotal(), orderData.getCreated_at(), clock);
@@ -130,8 +132,20 @@ class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
 	@Override
 	public void update(Order order) {
-		/* i should do this one but im not bc im lazy */
-		throw new UnsupportedOperationException("Unimplemented method 'update'");
+		this.jdbcClient.sql("""
+				SELECT * FROM orders WHERE id = :id;
+				""").param("id", order.getId()).query(OrderDbModel.class).optional()
+				.orElseThrow(() -> new NotFoundEx("Order not Found!"));
+		var updateSql = """
+				UPDATE
+					orders
+				SET
+					total = :total, status = :status, coupon = :coupon
+				WHERE id = :order_id;
+				""";
+		this.jdbcClient.sql(updateSql).param("total", order.getTotal()).param("status", order.getStatus())
+				.param("order_id", order.getId())
+				.param("coupon", order.getCoupons().size() == 1 ? order.getCoupons().get(0).getCode() : null).update();
 	}
 
 	@Override

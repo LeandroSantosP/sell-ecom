@@ -27,14 +27,15 @@ public class AuthController {
 
 	public AuthController(AuthService authService) {
 		this.authService = authService;
+		System.out.println("TEST1: "+authService);
 	}
 
 	public record SignInInput(String username, String password) {
-
 	}
 
 	@PostMapping("/signin")
 	public ResponseEntity<AuthenticateOutput> signin(@Valid @RequestBody SignInInput input) {
+		System.out.println("TEST: "+input);
 		var output = this.authService.authenticate(input.username(), input.password());
 		return ResponseEntity.ok(output);
 	}

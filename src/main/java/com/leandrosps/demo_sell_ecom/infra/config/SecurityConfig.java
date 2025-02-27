@@ -63,16 +63,14 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.authorizeHttpRequests(auth -> {
-			auth.requestMatchers("/api/auth/priv/**").authenticated();
-            auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
+		return http.csrf(csfr -> csfr.disable()).cors(cors -> cors.disable()).authorizeHttpRequests(auth -> {
+			auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 			auth.requestMatchers("/api/auth/**").permitAll();
+			auth.requestMatchers("/api/auth/priv/**").authenticated();
 			auth.anyRequest().authenticated();
-		}).httpBasic(Customizer.withDefaults()).csrf(cdrf -> cdrf.disable())
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
-					jwt.jwtAuthenticationConverter(this.jwtAuthenticationConverter());
-				})).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.build();
+		}).httpBasic(Customizer.withDefaults()).oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
+			jwt.jwtAuthenticationConverter(this.jwtAuthenticationConverter());
+		})).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
 	}
 
 	private JwtAuthenticationConverter jwtAuthenticationConverter() {

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -31,19 +30,16 @@ public class AuthService {
 
 	private UserRepository userRepository;
 	private RoleRepository roleRepository;
-	private AuthenticationManager authenticationManager;
 	private JwtEncoder jwtEncoder;
 	private PasswordEncoder passwordEncoder;
 	private Mail mail;
 	private ClientService clientService;
 	private MyClock clock;
 
-	public AuthService(UserRepository userRepository, RoleRepository roleRepository,
-			AuthenticationManager authenticationManager, JwtEncoder jwtEncoder, PasswordEncoder passwordEncoder,
-			Mail mail, ClientService clientService, MyClock clock) {
+	public AuthService(UserRepository userRepository, RoleRepository roleRepository, JwtEncoder jwtEncoder,
+			PasswordEncoder passwordEncoder, Mail mail, ClientService clientService, MyClock clock) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
-		this.authenticationManager = authenticationManager;
 		this.jwtEncoder = jwtEncoder;
 		this.passwordEncoder = passwordEncoder;
 		this.mail = mail;
@@ -51,7 +47,8 @@ public class AuthService {
 		this.clock = clock;
 	}
 
-	public record RegisterUserDto(String email, String password, String username, String name, String city, LocalDate birthday) {
+	public record RegisterUserDto(String email, String password, String username, String name, String city,
+			LocalDate birthday) {
 	}
 
 	private void sendMail(String code, String subject, String to) {
@@ -74,9 +71,11 @@ public class AuthService {
 			throw new BadCredentialsException("Ivalid Credentails!");
 		}
 		var user = new UserDbModel(input.username(), passwordEncoder.encode(input.password()), input.email());
+
 		this.sendMail(user.getValidationCode(), "Account Verification", user.getEmail());
 		this.userRepository.save(user);
-		this.clientService.create(new CreateInput(input.name(), user.getEmail(), user.getPassword(), input.city(), input.birthday()));
+		this.clientService.create(
+				new CreateInput(input.name(), user.getEmail(), user.getPassword(), input.city(), input.birthday()));
 	}
 
 	public record VerifyCodeInput(String email, String code) {
@@ -97,9 +96,9 @@ public class AuthService {
 		}
 
 		user.setEnabled(true);
-		
+
 		var user_id = this.userRepository.save(user).getId();
-		return user_id; 
+		return user_id;
 	}
 
 	public record ResendInput(String email) {
@@ -107,6 +106,7 @@ public class AuthService {
 
 	public void resend(String email) {
 		var user = this.userRepository.findByEmail(email).orElseThrow(NotFoundEx::new);
+
 		if (user.isEnabled()) {
 			throw new IllegalArgumentException("This user has already been verifield!");
 		}
@@ -121,12 +121,18 @@ public class AuthService {
 
 	public AuthenticateOutput authenticate(String username, String password) {
 		var userOp = this.userRepository.findByUsername(username);
-
+		
 		if (userOp.isEmpty()) {
 			throw new BadCredentialsException("Invalid password or username!");
 		}
-
+		
 		var user = userOp.get();
+		
+		System.out.println("HERE2: " + user.getEmail());
+		
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+			throw new BadCredentialsException("Invalid password or username!");
+		}
 
 		if (!user.isEnabled()) {
 			throw new RuntimeException("Account not verified, Please verify your account!");
@@ -148,8 +154,8 @@ public class AuthService {
 				authorities.add(authority.toString());
 			}
 		}
-		user.isEnabled();
 
+		user.isEnabled();
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("user_roles", authorities);
 		claims.put("is_unabled", user.isEnabled());

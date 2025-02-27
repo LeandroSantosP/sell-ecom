@@ -13,7 +13,7 @@
 	<artifactId>demo-sell-ecom</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>demo-sell-ecom</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Sell ecom is an e-commerce application using spring-boot! </description>
 	<url />
 	<licenses>
 		<license />
@@ -102,7 +102,6 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

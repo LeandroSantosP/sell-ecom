@@ -108,7 +108,6 @@ public class OrderServiceTest {
     }
 
     @Test
-    @Tag("current")
     void testMySqlConnAndInitialValues() {
         assertThat(mysqldb.isCreated()).isTrue();
         assertThat(mysqldb.isRunning()).isTrue();

@@ -62,7 +62,6 @@ class CouponRepositoryCustomImpl implements CouponRepositoryCustom {
 				expired_at = :expired_at
 				WHERE code = :code
 				""";
-		var user = "leandro";
 		this.jdbcClient.sql(sqlUpdateCoupon).param("code", coupon.getCode()).param("used", coupon.getUsed())
 				.param("is_available", coupon.isAvailable()).param("expired_at", coupon.getExpiredAt()).update();
 	}
