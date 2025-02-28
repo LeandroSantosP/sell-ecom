@@ -128,8 +128,6 @@ public class AuthService {
 		
 		var user = userOp.get();
 		
-		System.out.println("HERE2: " + user.getEmail());
-		
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 			throw new BadCredentialsException("Invalid password or username!");
 		}
@@ -159,6 +157,7 @@ public class AuthService {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("user_roles", authorities);
 		claims.put("is_unabled", user.isEnabled());
+		claims.put("user_email", user.getEmail());
 
 		var jwtClaimsSet = JwtClaimsSet.builder().claims(c -> c.putAll(claims)).issuer("sell-ecom-backend")
 				.subject(user.getId().toString()).expiresAt(expiredIn).build();

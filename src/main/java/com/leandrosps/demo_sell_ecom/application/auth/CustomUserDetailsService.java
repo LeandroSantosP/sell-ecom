@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		for (int i = 0; i < roles_json.length(); i++) {
 			roles.add(roles_json.getString(i));
 		}
-		return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
+		return new UserCustom(user.getUsername(), user.getPassword(), user.getAuthorities(), user.getEmail());
 	}
 
 }

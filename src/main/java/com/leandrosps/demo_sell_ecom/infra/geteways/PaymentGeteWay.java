@@ -20,6 +20,7 @@ public interface PaymentGeteWay {
 
 @Slf4j
 @Component
+@Primary
 class MyHttpClientFack implements PaymentGeteWay {
 	@Override
 	public ResonseBody execut(String token) {
@@ -33,7 +34,6 @@ class MyHttpClientFack implements PaymentGeteWay {
 
 @Slf4j
 @Component
-@Primary
 class MyHttpClinet implements PaymentGeteWay {
 
 	private HttpClient client = HttpClient.newHttpClient();

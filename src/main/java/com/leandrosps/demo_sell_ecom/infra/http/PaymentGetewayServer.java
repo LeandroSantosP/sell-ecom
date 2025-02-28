@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
@@ -20,7 +21,7 @@ class ProcessePaymentBody {
 	String token;
 }
 
-/* The Ideia is simulate an patment Getway which or application uses */
+/* The Ideia is simulate an payment Getway which our application uses */
 @Slf4j
 @Component
 public class PaymentGetewayServer {

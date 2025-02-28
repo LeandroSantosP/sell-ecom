@@ -10,6 +10,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class Client {
+   
    UUID id;  
    String name;
    String email;

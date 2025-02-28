@@ -12,8 +12,8 @@ public interface Mail {
 	public void send(String to, String subject, String text);
 }
 
-@Primary
 @Component
+@Primary
 class FackMail implements Mail {
 
 	@Override

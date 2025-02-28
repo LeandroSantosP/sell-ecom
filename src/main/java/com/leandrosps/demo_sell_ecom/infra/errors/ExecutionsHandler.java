@@ -26,7 +26,6 @@ public class ExecutionsHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     private ResponseEntity<HttpExeptionFormater> runtimeEx(RuntimeException ex) {
-        ex.printStackTrace();
         var exFormatter = new HttpExeptionFormater(ERROTYPE.NOT_CUSTOM, ex.getMessage());
         return ResponseEntity.badRequest().body(exFormatter);
     }

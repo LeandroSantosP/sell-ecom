@@ -79,9 +79,13 @@ public class Order {
       return this.status.name();
    }
 
+   public static boolean isValidSatus(String status) {
+      var VALID_STATUS = List.of("PAID", "RECUSSED", "CANCEL","WAITING_PAYMENT");
+      return VALID_STATUS.contains(status) ? true : false;
+   }
+
    public void updated_status(String status) {
-      var VALID_STATUS = List.of("PAID", "RECUSSED", "CANCEL");
-      if (!VALID_STATUS.contains(status)) {
+      if (!isValidSatus(status)) {
          throw new RuntimeException("Invalid Status!");
       }
 

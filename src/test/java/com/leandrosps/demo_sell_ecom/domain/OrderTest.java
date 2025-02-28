@@ -32,7 +32,6 @@ public class OrderTest {
 
    @Test
    void shouldCreateAnValidTest() {
-
       Order order = Order.create(UUID.randomUUID().toString(), "joao@exemple.com.br", clock);
       orderItems.forEach(item -> order.addItem(item.unityPrice(), item.quantity(), item.productId()));
       assertEquals(240, order.calcTotal(addressDefault), "The total of the order is incorrect!");
