@@ -10,9 +10,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.leandrosps</groupId>
-	<artifactId>demo-sell-ecom</artifactId>
+	<artifactId>sell-ecom</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo-sell-ecom</name>
+	<name>sell-ecom</name>
 	<description>Sell ecom is an e-commerce application using spring-boot! </description>
 	<url />
 	<licenses>
