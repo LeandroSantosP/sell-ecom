@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file:
-      - .prod.env
+      - .env
     depends_on:
       - database
     ports:
