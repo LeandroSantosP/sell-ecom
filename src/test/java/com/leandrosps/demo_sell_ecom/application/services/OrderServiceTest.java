@@ -30,6 +30,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.security.access.AccessDeniedException;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -186,12 +187,25 @@ public class OrderServiceTest {
                 () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", "SAVE10"));
 
         var usedCouponAfter = couponRepository.findById("SAVE10").get();
-        var order = this.orderQueryService.getOrderById(id);
+        var order = this.orderQueryService.getOrder(id, "joao@exemplo.com.br");
 
         assertEquals("WAITING_PAYMENT", order.getStatus());
         assertEquals(1, usedCouponAfter.getUsed());
         assertThat(order.getTotal()).isEqualTo(945);
         assertEquals("SAVE10", order.getCoupon());
+    }
+
+    @Test
+    void shouldNotBeAbleToAccessAnUnAtorizedResource() {
+        List<ItemInputs> itemsInput = new ArrayList<>(
+                List.of(new ItemInputs("284791a5-5a40-4a31-a60c-d2df68997569", 5)));
+
+        var id = assertDoesNotThrow(
+                () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
+        var unauthorizedClient = "wiliam123@exemplo.com";
+
+        assertThrows("Client are not authorized to access this resource!", AccessDeniedException.class,
+                () -> this.orderQueryService.getOrder(id, unauthorizedClient));
     }
 
     @Test
@@ -203,7 +217,7 @@ public class OrderServiceTest {
         var order_id = this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null);
         var order = this.orderRepository.getOrder(order_id);
 
-        this.orderService.makePayment(order.getId(), "62887c55-38b2-4099-9e0c-1674756ea315");
+        this.orderService.makePayment(order.getId(), "joao@exemplo.com.br", "62887c55-38b2-4099-9e0c-1674756ea315");
 
         assertEquals(1, order.getOrderItems().size());
         var orderItem = order.getOrderItems().get(0);
@@ -226,7 +240,7 @@ public class OrderServiceTest {
 
         var order_id = assertDoesNotThrow(
                 () -> this.orderService.placeOrder("joao@exemplo.com.br", itemsInput, "36300008", null));
-        this.orderService.makePayment(order_id, "62887c55-38b2-4099-9e0c-1674756ea315");
+        this.orderService.makePayment(order_id, "joao@exemplo.com.br", "62887c55-38b2-4099-9e0c-1674756ea315");
         var order = this.orderRepository.getOrder(order_id);
         assertEquals("PAID", order.getStatus());
     }
@@ -247,7 +261,7 @@ public class OrderServiceTest {
         var usedCouponBefore = couponRepository.findById("SAVE10").get();
         assertEquals(1, usedCouponBefore.getUsed());
 
-        this.orderService.makePayment(order_id, "62887c55-38b2-4099-9e0c-1674756ea315");
+        this.orderService.makePayment(order_id, "joao@exemplo.com.br","62887c55-38b2-4099-9e0c-1674756ea315");
 
         var order = this.orderRepository.getOrder(order_id);
         var usedCouponAfter = couponRepository.findById("SAVE10").get();

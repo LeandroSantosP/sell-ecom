@@ -35,7 +35,6 @@ public class AuthController {
 
 	@PostMapping("/signin")
 	public ResponseEntity<AuthenticateOutput> signin(@Valid @RequestBody SignInInput input) {
-		System.out.println("TEST: "+input);
 		var output = this.authService.authenticate(input.username(), input.password());
 		return ResponseEntity.ok(output);
 	}

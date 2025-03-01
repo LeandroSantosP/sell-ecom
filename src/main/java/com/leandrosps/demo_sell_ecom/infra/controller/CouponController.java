@@ -15,7 +15,6 @@ import com.leandrosps.demo_sell_ecom.application.services.CouponService;
 import com.leandrosps.demo_sell_ecom.application.services.CouponService.CreateCouponInput;
 import com.leandrosps.demo_sell_ecom.application.services.CouponService.GetCouponOutput;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

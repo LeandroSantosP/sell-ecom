@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -49,8 +50,7 @@ public class OrderController {
     public record ReguesBody(String email, String addressCode, String getewaytoken, List<ListItem> items) {
     }
 
-    public record InputOrderController(@NotNull String email, @NotNull List<ItemInputs> items,
-            @NotNull String getewaytoken, @NotNull String addressCode, String coupon) {
+    public record InputOrderController(@NotNull List<ItemInputs> items, @NotNull String addressCode, String coupon) {
     }
 
     @Operation(summary = "Create news Order.", description = "Usecase for that users can places orders.")
@@ -60,7 +60,7 @@ public class OrderController {
     @ApiResponse(responseCode = "500", description = "Internal Server Error!")
     @PostMapping("/place-order")
     public ResponseEntity<?> placeOrder(@Valid @RequestBody InputOrderController input) {
-        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var user_email = getUserEmail(principal);
         String product_id = this.orderService.placeOrder(user_email, input.items(), input.addressCode(),
                 input.coupon());
@@ -87,7 +87,7 @@ public class OrderController {
     @ApiResponse(responseCode = "400", description = "Ivalid order Status!")
     @GetMapping("/get-order/{order_id}")
     public ResponseEntity<GetOrderByIdOuput> getOrderById(@Valid @PathVariable String order_id) {
-        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var user_email = getUserEmail(principal);
         var output = this.orderQueryService.getOrder(order_id, user_email);
         return ResponseEntity.ok().body(output);
@@ -101,7 +101,9 @@ public class OrderController {
     @PostMapping("/make-payment/{order_id}")
     public ResponseEntity<ReguesBody> makePayment(@NotNull @PathVariable String order_id,
             @RequestBody MakePaymenBody body) {
-        this.orderService.makePayment(order_id, body.payment_token());
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var user_email = getUserEmail(principal);
+        this.orderService.makePayment(order_id, user_email, body.payment_token());
         return ResponseEntity.ok().build();
     }
 

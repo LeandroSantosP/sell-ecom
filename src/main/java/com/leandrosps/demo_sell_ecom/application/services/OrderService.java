@@ -2,6 +2,8 @@ package com.leandrosps.demo_sell_ecom.application.services;
 
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import com.leandrosps.demo_sell_ecom.domain.Address;
 import com.leandrosps.demo_sell_ecom.domain.Client;
@@ -82,9 +84,13 @@ public class OrderService {
 		return order.getId();
 	}
 
-	public void makePayment(String order_id, String gatewayToken) {
+	public void makePayment(String order_id, String clientEmail,  String gatewayToken) {
 
 		var order = this.orderRepository.getOrder(order_id);
+
+		if (!order.getClientEmail().equals(clientEmail)) {
+			 throw new AccessDeniedException("The Client is not authorized to carry out this operation!");
+		}
 
 		var response = this.paymentGeteWay.execut(gatewayToken);
 

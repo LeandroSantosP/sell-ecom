@@ -49,10 +49,8 @@ public class OrderQueryService {
                 var orderData = this.jdbcClient.sql(getOrderSql).param("id", order_id).query(OrderDbModel.class)
                                 .optional().orElseThrow(() -> new NotFoundEx("Order Not exists!"));
 
-                System.out.println(orderData.getClient_email());
-                System.out.println(userEmail);
                 if (!orderData.getClient_email().equals(userEmail)) {
-                        throw new AccessDeniedException("Client are not authozied to access this resource!");
+                        throw new AccessDeniedException("The client is not authorized to access this resource!");
                 }
 
                 var orderItems = jdbcClient.sql("SELECT * FROM order_items WHERE order_id = :order_id")
